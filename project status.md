@@ -19,7 +19,10 @@ Improve the Qt app so it follows screen-reader and keyboard accessibility best p
 - `scripts/windows/deploy.bat` was updated to:
 - discover Qt from `build/CMakeCache.txt` or known locations,
 - retry `windeployqt` without `--force-openssl` for older Qt versions, and
-- copy `libcurl.dll` and `libxml2.dll` into `build/Release` when found.
+- copy dependency DLLs into `build/Release`.
+- Runtime dependency handling was hardened:
+- Added `scripts/windows/copy-runtime-deps.ps1` to recursively resolve and copy transitive DLL dependencies (e.g., `zlib.dll`, `libssh2.dll`, `iconv.dll`, VC runtime DLLs) from the resolved dependency bin.
+- `scripts/windows/deploy.bat` now calls this script after base DLL copy.
 - Local verification now passes with:
 - `scripts/windows/configure.bat`
 - `scripts/windows/build.bat`

@@ -7,6 +7,7 @@ set "BUILD_DIR=%PROJECT_DIR%\build"
 set "EXE_PATH=%BUILD_DIR%\Release\appKhinsiderQT.exe"
 set "CACHE_FILE=%BUILD_DIR%\CMakeCache.txt"
 set "QT_BIN_PATH="
+set "DEPS_BIN="
 
 if not exist "%EXE_PATH%" (
     echo Build output not found: "%EXE_PATH%"
@@ -54,6 +55,40 @@ if errorlevel 1 (
 
 call :copyDependencyDll "%CACHE_FILE%" "CURL_LIBRARY" "libcurl.dll"
 call :copyDependencyDll "%CACHE_FILE%" "LibXml2_LIBRARY" "libxml2.dll"
+set "LIB_PATH="
+if exist "%CACHE_FILE%" (
+    for /f "tokens=1,* delims==" %%a in ('findstr /b /c:"CURL_LIBRARY:" "%CACHE_FILE%"') do (
+        set "LIB_PATH=%%b"
+    )
+)
+if defined LIB_PATH (
+    set "LIB_PATH=!LIB_PATH:/=\!"
+    for %%d in ("!LIB_PATH!\..\..\bin") do (
+        if exist "%%~fd" set "DEPS_BIN=%%~fd"
+    )
+)
+
+if not defined DEPS_BIN (
+    set "LIB_PATH="
+    if exist "%CACHE_FILE%" (
+        for /f "tokens=1,* delims==" %%a in ('findstr /b /c:"LibXml2_LIBRARY:" "%CACHE_FILE%"') do (
+            set "LIB_PATH=%%b"
+        )
+    )
+    if defined LIB_PATH (
+        set "LIB_PATH=!LIB_PATH:/=\!"
+        for %%d in ("!LIB_PATH!\..\..\bin") do (
+            if exist "%%~fd" set "DEPS_BIN=%%~fd"
+        )
+    )
+)
+
+if defined DEPS_BIN (
+    echo Resolving transitive dependencies from: !DEPS_BIN!
+    call :copyDependencyClosure "!DEPS_BIN!" "%BUILD_DIR%\Release"
+) else (
+    echo Skipping transitive dependency copy: no dependency bin could be resolved.
+)
 exit /b 0
 
 :findQtBinInRoot
@@ -105,5 +140,34 @@ for %%d in ("!LIB_PATH!\..\..\bin\%DLL_NAME%") do (
         copy /Y "%%~fd" "%BUILD_DIR%\Release\%DLL_NAME%" >nul
         echo Copied %DLL_NAME% from %%~fd
     )
+)
+exit /b 0
+
+:copyDependencyClosure
+set "SRC_BIN=%~1"
+set "TARGET_DIR=%~2"
+set "DUMPBIN_EXE="
+
+for /f "delims=" %%i in ('where dumpbin 2^>nul') do (
+    if not defined DUMPBIN_EXE set "DUMPBIN_EXE=%%i"
+)
+if not defined DUMPBIN_EXE if exist "D:\downloads\AI\dione\bin\build_tools\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\dumpbin.exe" (
+    set "DUMPBIN_EXE=D:\downloads\AI\dione\bin\build_tools\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\dumpbin.exe"
+)
+if not defined DUMPBIN_EXE (
+    echo dumpbin.exe not found; unable to resolve transitive dependencies.
+    exit /b 0
+)
+
+set "DEPS_SCRIPT=%~dp0copy-runtime-deps.ps1"
+if not exist "%DEPS_SCRIPT%" (
+    echo Dependency copy script not found: %DEPS_SCRIPT%
+    exit /b 1
+)
+
+powershell -NoProfile -ExecutionPolicy Bypass -File "%DEPS_SCRIPT%" -Dumpbin "%DUMPBIN_EXE%" -SourceBin "%SRC_BIN%" -TargetDir "%TARGET_DIR%" -EntryExe "appKhinsiderQT.exe"
+if errorlevel 1 (
+    echo Failed to resolve transitive dependencies.
+    exit /b 1
 )
 exit /b 0
