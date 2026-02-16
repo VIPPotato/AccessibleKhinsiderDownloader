@@ -58,10 +58,18 @@ Automatic Building
 ```bash
 git clone https://github.com/weespin/KhinsiderDownloader.git --branch experimental
 cd KhinsiderDownloader/scripts/windows
+vendor-deps.bat   # optional: copy dependencies into third_party/windows/deps
 fullbuild.bat
 ```
 
-`scripts/windows/configure.bat` auto-detects Qt and vcpkg. If vcpkg is unavailable, it can fall back to Conda dependencies. You can override detection using `QT_CMAKE_PATH` and `KH_DEPS_ROOT`.
+`scripts/windows/configure.bat` now checks dependencies in this order:
+
+1. `third_party/windows/deps` (project-local vendored deps)
+2. vcpkg (when available)
+3. Conda `Library` roots
+
+Use `scripts/windows/vendor-deps.bat` to populate `third_party/windows/deps`.
+You can still override detection using `QT_CMAKE_PATH` and `KH_DEPS_ROOT`.
 
 ### Linux
 #### Requirements

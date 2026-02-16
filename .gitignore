@@ -82,6 +82,11 @@ CMakeLists.txt.user*
 /build*/
 /cmake-build*/
 
+# Local vendored Windows dependencies (machine-specific, do not commit binaries)
+/third_party/windows/deps/*
+!/third_party/windows/deps/.gitkeep
+!/third_party/windows/deps/README.md
+
 # Clion
 .idea/
 

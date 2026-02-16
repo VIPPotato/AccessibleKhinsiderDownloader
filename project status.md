@@ -23,9 +23,18 @@ Improve the Qt app so it follows screen-reader and keyboard accessibility best p
 - Runtime dependency handling was hardened:
 - Added `scripts/windows/copy-runtime-deps.ps1` to recursively resolve and copy transitive DLL dependencies (e.g., `zlib.dll`, `libssh2.dll`, `iconv.dll`, VC runtime DLLs) from the resolved dependency bin.
 - `scripts/windows/deploy.bat` now calls this script after base DLL copy.
+- Project-local vendored dependency flow added:
+- `scripts/windows/vendor-deps.bat` copies headers, import libs, and runtime DLL dependency closure into `third_party/windows/deps`.
+- `scripts/windows/configure.bat` now prefers `third_party/windows/deps` before global dependency locations.
+- `third_party/windows/deps/README.md` documents the layout and usage.
+- `scripts/windows/configure.bat` now uses `LIBXML2_*` cache variables (not `LibXml2_*`) and absolute project paths, so configure works from repo root and picks vendored libxml2 correctly.
+- `scripts/windows/build.bat`, `clean.bat`, `fullbuild.bat`, and `fullbuildandcreateinstaller.bat` now resolve paths via `%~dp0`/absolute project paths.
+- `scripts/windows/deploy.bat` now copies VC runtime DLLs from detected VC redist folders or `%SystemRoot%\System32` fallback.
 - Local verification now passes with:
 - `scripts/windows/configure.bat`
 - `scripts/windows/build.bat`
+- `scripts/windows/deploy.bat`
 - Combined run `scripts/windows/configure.bat && scripts/windows/build.bat` also succeeds and produces:
 - `build/Release/appKhinsiderQT.exe`
+- Full run `scripts/windows/clean.bat && scripts/windows/configure.bat && scripts/windows/build.bat && scripts/windows/deploy.bat` succeeds.
 - `scripts/windows/fullbuild.bat` also completes end-to-end in this environment.

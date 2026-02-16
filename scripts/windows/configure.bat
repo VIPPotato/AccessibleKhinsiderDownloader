@@ -1,6 +1,11 @@
 @echo off
 setlocal EnableDelayedExpansion
 
+set "PROJECT_DIR=%~dp0..\.."
+for %%p in ("%PROJECT_DIR%") do set "PROJECT_DIR=%%~fp"
+set "PROJECT_DEPS_ROOT=%PROJECT_DIR%\third_party\windows\deps"
+set "BUILD_DIR=%PROJECT_DIR%\build"
+
 set "QT_FOUND=false"
 set "QT_MSVC_PATH="
 
@@ -51,11 +56,12 @@ echo Using Qt from: !QT_MSVC_PATH!
 
 if !USE_VCPKG!==true (
     echo Using vcpkg from: "%VCPKG_ROOT%"
-    cmake -S ..\..\ -B ..\..\build -DCMAKE_TOOLCHAIN_FILE="%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" -DCMAKE_PREFIX_PATH="!QT_MSVC_PATH!"
+    cmake -S "!PROJECT_DIR!" -B "!BUILD_DIR!" -DCMAKE_TOOLCHAIN_FILE="%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" -DCMAKE_PREFIX_PATH="!QT_MSVC_PATH!"
     exit /b %errorlevel%
 )
 
 set "DEPS_ROOT="
+if not defined DEPS_ROOT call :tryDepsRoot "%PROJECT_DEPS_ROOT%"
 if defined KH_DEPS_ROOT call :tryDepsRoot "%KH_DEPS_ROOT%"
 if not defined DEPS_ROOT if defined CONDA_PREFIX call :tryDepsRoot "%CONDA_PREFIX%\Library"
 if not defined DEPS_ROOT call :tryDepsRoot "%USERPROFILE%\Miniconda3\Library"
@@ -72,13 +78,13 @@ set "LIBXML_LIBRARY=!DEPS_ROOT!\lib\libxml2.lib"
 if not exist "!LIBXML_LIBRARY!" set "LIBXML_LIBRARY=!DEPS_ROOT!\lib\xml2.lib"
 
 echo Using fallback dependencies from: !DEPS_ROOT!
-cmake -S ..\..\ -B ..\..\build ^
+cmake -S "!PROJECT_DIR!" -B "!BUILD_DIR!" ^
  -DCMAKE_TOOLCHAIN_FILE= ^
  -DCMAKE_PREFIX_PATH="!QT_MSVC_PATH!;!DEPS_ROOT!" ^
  -DCURL_INCLUDE_DIR="!DEPS_ROOT!\include" ^
  -DCURL_LIBRARY="!DEPS_ROOT!\lib\libcurl.lib" ^
- -DLibXml2_INCLUDE_DIR="!DEPS_ROOT!\include\libxml2" ^
- -DLibXml2_LIBRARY="!LIBXML_LIBRARY!"
+ -DLIBXML2_INCLUDE_DIR="!DEPS_ROOT!\include\libxml2" ^
+ -DLIBXML2_LIBRARY="!LIBXML_LIBRARY!"
 exit /b %errorlevel%
 
 :findQtInRoot

@@ -54,7 +54,7 @@ if errorlevel 1 (
 )
 
 call :copyDependencyDll "%CACHE_FILE%" "CURL_LIBRARY" "libcurl.dll"
-call :copyDependencyDll "%CACHE_FILE%" "LibXml2_LIBRARY" "libxml2.dll"
+call :copyDependencyDll "%CACHE_FILE%" "LIBXML2_LIBRARY" "libxml2.dll"
 set "LIB_PATH="
 if exist "%CACHE_FILE%" (
     for /f "tokens=1,* delims==" %%a in ('findstr /b /c:"CURL_LIBRARY:" "%CACHE_FILE%"') do (
@@ -71,7 +71,7 @@ if defined LIB_PATH (
 if not defined DEPS_BIN (
     set "LIB_PATH="
     if exist "%CACHE_FILE%" (
-        for /f "tokens=1,* delims==" %%a in ('findstr /b /c:"LibXml2_LIBRARY:" "%CACHE_FILE%"') do (
+        for /f "tokens=1,* delims==" %%a in ('findstr /b /c:"LIBXML2_LIBRARY:" "%CACHE_FILE%"') do (
             set "LIB_PATH=%%b"
         )
     )
@@ -83,12 +83,90 @@ if not defined DEPS_BIN (
     )
 )
 
+call :copyVCRuntime "%BUILD_DIR%\Release"
+
 if defined DEPS_BIN (
     echo Resolving transitive dependencies from: !DEPS_BIN!
     call :copyDependencyClosure "!DEPS_BIN!" "%BUILD_DIR%\Release"
 ) else (
     echo Skipping transitive dependency copy: no dependency bin could be resolved.
 )
+exit /b 0
+
+:copyVCRuntime
+set "TARGET_DIR=%~1"
+set "VC_REDIST_DIR="
+
+if defined VCToolsRedistDir (
+    call :pickVcRedist "%VCToolsRedistDir%"
+)
+
+if not defined VC_REDIST_DIR (
+    set "CL_EXE="
+    for /f "delims=" %%i in ('where cl 2^>nul') do (
+        if not defined CL_EXE set "CL_EXE=%%i"
+    )
+    if defined CL_EXE (
+        set "VC_ROOT="
+        for %%r in ("!CL_EXE!\..\..\..\..\..\..") do set "VC_ROOT=%%~fr"
+        if defined VC_ROOT (
+            call :pickVcRedist "!VC_ROOT!\Redist\MSVC"
+        )
+    )
+)
+
+if not defined VC_REDIST_DIR if exist "%CACHE_FILE%" (
+    set "TOOL_PATH="
+    for /f "tokens=1,* delims==" %%a in ('findstr /b /c:"CMAKE_AR:FILEPATH=" "%CACHE_FILE%"') do (
+        set "TOOL_PATH=%%b"
+    )
+    if defined TOOL_PATH (
+        set "TOOL_PATH=!TOOL_PATH:/=\!"
+        set "VC_ROOT="
+        for %%r in ("!TOOL_PATH!\..\..\..\..\..\..") do set "VC_ROOT=%%~fr"
+        if defined VC_ROOT (
+            call :pickVcRedist "!VC_ROOT!\Redist\MSVC"
+        )
+    )
+)
+
+if not defined VC_REDIST_DIR (
+    call :copySystemVCRuntime "%TARGET_DIR%"
+    exit /b 0
+)
+
+for %%f in ("!VC_REDIST_DIR!\*.dll") do (
+    if exist "%%~ff" (
+        copy /Y "%%~ff" "%TARGET_DIR%\%%~nxf" >nul
+    )
+)
+echo Copied VC runtime DLLs from: !VC_REDIST_DIR!
+exit /b 0
+
+:pickVcRedist
+set "REDIST_BASE=%~1"
+if not defined REDIST_BASE exit /b 0
+if not "%REDIST_BASE:~-1%"=="\" set "REDIST_BASE=%REDIST_BASE%\"
+if not exist "!REDIST_BASE!" exit /b 0
+
+if exist "!REDIST_BASE!x64\Microsoft.VC143.CRT" if not defined VC_REDIST_DIR set "VC_REDIST_DIR=!REDIST_BASE!x64\Microsoft.VC143.CRT"
+if exist "!REDIST_BASE!onecore\x64\Microsoft.VC143.CRT" if not defined VC_REDIST_DIR set "VC_REDIST_DIR=!REDIST_BASE!onecore\x64\Microsoft.VC143.CRT"
+
+for /f "delims=" %%v in ('dir /b /ad "!REDIST_BASE!" 2^>nul') do (
+    if exist "!REDIST_BASE!%%v\x64\Microsoft.VC143.CRT" if not defined VC_REDIST_DIR set "VC_REDIST_DIR=!REDIST_BASE!%%v\x64\Microsoft.VC143.CRT"
+    if exist "!REDIST_BASE!%%v\onecore\x64\Microsoft.VC143.CRT" if not defined VC_REDIST_DIR set "VC_REDIST_DIR=!REDIST_BASE!%%v\onecore\x64\Microsoft.VC143.CRT"
+)
+exit /b 0
+
+:copySystemVCRuntime
+set "TARGET_DIR=%~1"
+set "SYS32=%SystemRoot%\System32"
+for %%n in (MSVCP140.dll MSVCP140_1.dll MSVCP140_2.dll VCRUNTIME140.dll VCRUNTIME140_1.dll concrt140.dll) do (
+    if exist "!SYS32!\%%n" (
+        copy /Y "!SYS32!\%%n" "%TARGET_DIR%\%%n" >nul
+    )
+)
+echo Copied VC runtime DLLs from: !SYS32!
 exit /b 0
 
 :findQtBinInRoot
