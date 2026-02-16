@@ -13,6 +13,9 @@ Window {
     color: "#2c3e50"
     signal accepted
     title: "A new update has been released!"
+    Component.onCompleted: okButton.forceActiveFocus()
+    Accessible.role: Accessible.Dialog
+    Accessible.name: title
     Column
     {
         width: parent.width
@@ -27,12 +30,17 @@ Window {
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             wrapMode: Text.WordWrap
+
+            Accessible.role: Accessible.StaticText
+            Accessible.name: text
         }
         WButton
         {
+            id: okButton
             anchors.horizontalCenter: parent.horizontalCenter
             width :parent.width * 0.5
             label: "OK"
+            accessibleName: "Open downloads page"
             height: parent.height * 0.15
             onClicked:
             {

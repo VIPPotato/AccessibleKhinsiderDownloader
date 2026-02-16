@@ -7,7 +7,23 @@ Item {
     function hideAllResults()
     {
         root.isSearching = true;
-        root.selectedIndex = -1;
+        app.searchController.searchResultVM.setSelectedIndex(-1);
+    }
+    function selectResult(resultIndex) {
+        if (resultIndex < 0 || resultIndex >= resultRepeater.count) {
+            return;
+        }
+        app.searchController.searchResultVM.setSelectedIndex(resultIndex);
+    }
+    function focusResult(resultIndex) {
+        if (resultIndex < 0 || resultIndex >= resultRepeater.count) {
+            return;
+        }
+        selectResult(resultIndex);
+        var item = resultRepeater.itemAt(resultIndex);
+        if (item) {
+            item.forceActiveFocus();
+        }
     }
 
     property int selectedIndex: app.searchController.searchResultVM.selectedIndex
@@ -15,6 +31,10 @@ Item {
 
     height: 600
     width: 600
+
+    Accessible.role: Accessible.List
+    Accessible.name: "Search results"
+    Accessible.description: "Album search results. Use Up and Down arrows to move and Enter to select."
 
     WScrollView {
         id: scrollView
@@ -29,6 +49,7 @@ Item {
             width: root.width
 
             Repeater {
+                id: resultRepeater
                 model: app.searchController.searchResultVM
 
                 Rectangle {
@@ -44,6 +65,37 @@ Item {
                     x: isSelected ? 0 : (parent.width - width) / 2
                     scale: root.isSearching ? 0 : isSelected ? 0.95 : mouseArea.pressed ? 0.90 : 1.0
                     opacity: root.isSearching ? 0 : 1
+                    activeFocusOnTab: true
+                    border.width: activeFocus ? 2 : 0
+                    border.color: activeFocus ? "#ffffff" : "transparent"
+
+                    Accessible.role: Accessible.ListItem
+                    Accessible.name: model.name
+                    Accessible.description: isSelected ? "Selected" : "Not selected"
+                    Accessible.focusable: true
+                    Accessible.focused: activeFocus
+
+                    Keys.onReturnPressed: {
+                        root.selectResult(index);
+                        event.accepted = true;
+                    }
+                    Keys.onEnterPressed: {
+                        root.selectResult(index);
+                        event.accepted = true;
+                    }
+                    Keys.onSpacePressed: {
+                        root.selectResult(index);
+                        event.accepted = true;
+                    }
+                    Keys.onUpPressed: {
+                        root.focusResult(index - 1);
+                        event.accepted = true;
+                    }
+                    Keys.onDownPressed: {
+                        root.focusResult(index + 1);
+                        event.accepted = true;
+                    }
+
                     Behavior on scale {
                         NumberAnimation {
                             duration: 150
@@ -67,17 +119,11 @@ Item {
 
                         anchors.fill: parent
                         hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
 
                         onClicked: {
-                            if (root.selectedIndex >= 0 && root.selectedIndex !== index) {
-                                var prevItem = repeater.children[root.selectedIndex];
-                                if (prevItem && prevItem.isHovered) {
-                                    prevItem.isHovered = false;
-                                }
-                            }
-                            rectangle.anchors.horizontalCenter = undefined;
-                            root.selectedIndex = index;
-                            app.searchController.searchResultVM.setSelectedIndex(index);
+                            root.selectResult(index);
+                            rectangle.forceActiveFocus();
                         }
                         onEntered: {
                             if (!isSelected) {
@@ -120,6 +166,9 @@ Item {
            target: app.searchController.searchResultVM
            function onSearchCompleted() {
                root.isSearching = false;
+               if (resultRepeater.count > 0) {
+                   root.focusResult(0);
+               }
            }
        }
 }

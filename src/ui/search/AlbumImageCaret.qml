@@ -10,6 +10,11 @@ ColumnLayout{
     property int imageIndex: 0
     property int imageTarget : 0
     property var imageSources: app.searchController.albumInfoVM.albumImages
+
+    Accessible.role: Accessible.Pane
+    Accessible.name: "Album artwork viewer"
+    Accessible.description: "Use previous and next image buttons to switch artwork."
+
     Connections {
         target: app.searchController.albumInfoVM
         function onCurrentAlbumChanged()
@@ -43,6 +48,12 @@ ColumnLayout{
                 NumberAnimation { target: profileImage; property: "opacity"; to: 0; duration: 100 }
                 onStopped:
                 {
+                    if (col.imageSources.length === 0) {
+                        col.imageIndex = 0;
+                        col.imageTarget = 0;
+                        fadeIn.start();
+                        return;
+                    }
                     //wrap imageTarget
                     if(imageTarget < 0)
                     {
@@ -61,7 +72,7 @@ ColumnLayout{
             anchors.rightMargin: 10
             anchors.topMargin: 10
             anchors.bottomMargin: 10
-            source: col.imageSources[col.imageIndex]
+            source: col.imageSources.length > 0 ? col.imageSources[col.imageIndex] : "qrc:/icons/albumplaceholder.jpg"
             //source: "icons/albumplaceholder.jpg"
             fillMode: Image.PreserveAspectFit
             layer.enabled: true
@@ -136,6 +147,7 @@ ColumnLayout{
                 width: parent.width*0.2
                 height: parent.height
                 mirror: false
+                accessibleName: "Previous album image"
                 onRequestImageChange:
                 {
                     if(col.imageSources.length > 1)
@@ -159,12 +171,16 @@ ColumnLayout{
                 width: parent.width*0.6
                 height: parent.height
                 color: "#ffffff"
+
+                Accessible.role: Accessible.StaticText
+                Accessible.name: "Artwork index"
+                Accessible.description: text
                 SequentialAnimation {
                     id: fadeTextOut
                     NumberAnimation { target: indextextlabel; property: "opacity"; to: 0; duration: 50 }
                     onStopped: {
                         // Update the text after the fade-out
-                        indextextlabel._text = (col.imageIndex + 1) + "/" + col.imageSources.length
+                        indextextlabel._text = col.imageSources.length > 0 ? (col.imageIndex + 1) + "/" + col.imageSources.length : "0/0"
                         fadeTextIn.start()  // Start the fade-in animation
                     }
                 }
@@ -199,6 +215,7 @@ ColumnLayout{
             {
                 width: parent.width*0.2
                 height: parent.height
+                accessibleName: "Next album image"
                 onRequestImageChange:
                 {
                     if(col.imageSources.length > 1)

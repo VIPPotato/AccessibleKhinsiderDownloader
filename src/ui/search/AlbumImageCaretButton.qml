@@ -3,7 +3,7 @@ import QtQuick
 Image {
 
     signal requestImageChange()
-    property string accessibleName: mirror ? "Previous album image" : "Next album image"
+    property string accessibleName: "Change album image"
     activeFocusOnTab: true
 
     Accessible.role: Accessible.Button

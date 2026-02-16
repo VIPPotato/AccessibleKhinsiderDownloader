@@ -7,6 +7,10 @@ Rectangle
        id:root
        height: 800
        width: 600
+
+       Accessible.role: Accessible.Pane
+       Accessible.name: "Download queue panel"
+
        WScrollView
        {
               id: scrollView
@@ -20,6 +24,8 @@ Rectangle
 
               Column
               {
+                     Accessible.role: Accessible.List
+                     Accessible.name: "Download queue list"
 
                      width: root.width * 0.92;
                      height: root.height;
@@ -78,6 +84,9 @@ Rectangle
                             font.pointSize: 16
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
+                            Accessible.role: Accessible.StaticText
+                            Accessible.name: "Total download speed"
+                            Accessible.description: text
                             function formatSpeed(bytesPerSecond) {
                                    if (bytesPerSecond >= 1024 * 1024) {
                                           return (bytesPerSecond / (1024 * 1024)).toFixed(2) + " MB/s";
@@ -117,6 +126,9 @@ Rectangle
                             opacity: 0
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
+                            Accessible.role: Accessible.StaticText
+                            Accessible.name: "Downloaded songs"
+                            Accessible.description: text
                             Behavior on opacity {
                                  NumberAnimation {
                                      duration: 100

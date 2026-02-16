@@ -9,6 +9,9 @@ Rectangle {
     height: 500
     width: 200
 
+    Accessible.role: Accessible.Pane
+    Accessible.name: "Selected album details"
+
     ColumnLayout {
         anchors.fill:parent
         spacing: 5
@@ -73,6 +76,7 @@ Rectangle {
                         width: parent.width * 0.6
                         anchors.horizontalCenter: parent.horizontalCenter
                         label: "Add " + modelData
+                        accessibleName: "Add album as " + modelData
                         opacity:0
                         Behavior on opacity {
                             NumberAnimation {

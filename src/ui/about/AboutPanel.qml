@@ -10,6 +10,10 @@ Rectangle {
     color: "#2c3e50"
     height: 700
     width: 400
+
+    Accessible.role: Accessible.Pane
+    Accessible.name: "About panel"
+
     Connections {
         target: app.aboutController
         function onFoundNewUpdate() {
@@ -152,6 +156,25 @@ Rectangle {
                 color: "white"
                 onLinkActivated: Qt.openUrlExternally(link)
                 font.pointSize: 16
+                activeFocusOnTab: true
+
+                Accessible.role: Accessible.Link
+                Accessible.name: "Open Weespin website"
+                Accessible.focusable: true
+                Accessible.focused: activeFocus
+
+                Keys.onReturnPressed: {
+                    Qt.openUrlExternally("https://weesp.in");
+                    event.accepted = true;
+                }
+                Keys.onEnterPressed: {
+                    Qt.openUrlExternally("https://weesp.in");
+                    event.accepted = true;
+                }
+                Keys.onSpacePressed: {
+                    Qt.openUrlExternally("https://weesp.in");
+                    event.accepted = true;
+                }
             }
         }
 
