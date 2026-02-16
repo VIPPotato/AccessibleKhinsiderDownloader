@@ -23,6 +23,32 @@ Window {
     visible: true
     color: "#2c3e50"
     title: qsTr("Khinsider Downloader - QT")
+    function setActiveTab(targetState, button) {
+        maincol.state = targetState;
+        slider.jump(button);
+        button.forceActiveFocus();
+    }
+    Keys.onPressed: {
+        if (event.modifiers & Qt.ControlModifier) {
+            if (event.key === Qt.Key_1) {
+                setActiveTab("downloadtab", leftdownloadbutton);
+                event.accepted = true;
+            } else if (event.key === Qt.Key_2) {
+                setActiveTab("searchtab", leftsearchbutton);
+                event.accepted = true;
+            } else if (event.key === Qt.Key_3) {
+                setActiveTab("settingstab", leftsettingsbutton);
+                event.accepted = true;
+            } else if (event.key === Qt.Key_4) {
+                setActiveTab("abouttab", leftaboutbutton);
+                event.accepted = true;
+            }
+        }
+    }
+    Component.onCompleted: {
+        slider.jump(leftdownloadbutton);
+        leftdownloadbutton.forceActiveFocus();
+    }
 
     Column {
         id: maincol
@@ -131,9 +157,9 @@ Window {
                         iconFallback: "../../icons/dl.svg"
                         iconSource: "qrc:/icons/dl.svg"
                         label: "Download"
+                        accessibleName: maincol.state === "downloadtab" ? "Download tab, selected" : "Download tab"
                         onClicked: {
-                            maincol.state = "downloadtab"
-                            slider.jump(leftdownloadbutton);
+                            window.setActiveTab("downloadtab", leftdownloadbutton);
                         }
 
                     }
@@ -145,9 +171,9 @@ Window {
                         iconFallback: "../../icons/search.svg"
                         iconSource: "qrc:/icons/search.svg"
                         label: "Search"
+                        accessibleName: maincol.state === "searchtab" ? "Search tab, selected" : "Search tab"
                         onClicked: {
-                            maincol.state = "searchtab"
-                            slider.jump(leftsearchbutton);
+                            window.setActiveTab("searchtab", leftsearchbutton);
                         }
                     }
 
@@ -158,9 +184,9 @@ Window {
                         iconFallback: "../../icons/settings.svg"
                         iconSource: "qrc:/icons/settings.svg"
                         label: "Settings"
+                        accessibleName: maincol.state === "settingstab" ? "Settings tab, selected" : "Settings tab"
                         onClicked: {
-                            maincol.state = "settingstab"
-                            slider.jump(leftsettingsbutton);
+                            window.setActiveTab("settingstab", leftsettingsbutton);
                         }
                     }
 
@@ -175,9 +201,9 @@ Window {
                         iconFallback: "../../icons/about.svg"
                         iconSource: "qrc:/icons/about.svg"
                         label: "About"
+                        accessibleName: maincol.state === "abouttab" ? "About tab, selected" : "About tab"
                         onClicked: {
-                            maincol.state = "abouttab"
-                            slider.jump(leftaboutbutton);
+                            window.setActiveTab("abouttab", leftaboutbutton);
                         }
                     }
                     Item {

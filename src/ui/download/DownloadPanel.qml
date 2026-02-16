@@ -7,6 +7,13 @@ Item {
     //todo: show speed per album, MB/MB stop button (delete)
     width: 800
     height: 600
+    function importBulkUrls() {
+        app.downloaderController.downloaderVM.addToDownloadList(textfield.text);
+        textfield.text = "";
+    }
+    function cancelAllDownloads() {
+        app.downloaderController.downloaderVM.cancelAllDownloads();
+    }
     Rectangle {
         id:mainWindow
         state: "normal"
@@ -73,6 +80,20 @@ Item {
                                     placeholderText: "URLs here"
                                     width: parent.width
                                     background:null
+                                    activeFocusOnTab: true
+
+                                    Accessible.role: Accessible.EditableText
+                                    Accessible.name: "Album URLs input"
+                                    Accessible.description: "Paste one URL per line and press Import."
+                                    Accessible.focusable: true
+                                    Accessible.focused: activeFocus
+
+                                    Keys.onPressed: {
+                                        if ((event.modifiers & Qt.ControlModifier) && (event.key === Qt.Key_Return || event.key === Qt.Key_Enter)) {
+                                            root.importBulkUrls();
+                                            event.accepted = true;
+                                        }
+                                    }
 
                                     PropertyAnimation {
                                         id: onPlaceholderHover
@@ -115,10 +136,10 @@ Item {
 
                         Layout.preferredWidth: parent.width * 0.8
                         label: "Import"
+                        accessibleName: "Import URLs into download queue"
                         onClicked:
                         {
-                            app.downloaderController.downloaderVM.addToDownloadList(textfield.text);
-                            textfield.text = "";
+                            root.importBulkUrls();
                             //mainWindow.state = (mainWindow.state === "normal") ? "expanded" : "normal"
                         }
                     }
@@ -127,9 +148,10 @@ Item {
                         Layout.preferredHeight: 45
                         Layout.preferredWidth: parent.width * 0.8
                         Layout.alignment: Qt.AlignCenter
+                        accessibleName: "Cancel all downloads"
                         onClicked:
                         {
-                            app.downloaderController.downloaderVM.cancelAllDownloads();
+                            root.cancelAllDownloads();
                         }
                         label: "Cancel All"
                     }

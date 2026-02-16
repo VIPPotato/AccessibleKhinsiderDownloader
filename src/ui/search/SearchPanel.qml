@@ -8,6 +8,9 @@ Rectangle {
     id: mainWindow
     height : 500
     color: "#2c3e50"
+    function triggerSearch() {
+        app.searchController.doSearch(textfield.text);
+    }
 
     Connections
     {
@@ -98,6 +101,13 @@ Rectangle {
                                     placeholderTextColor: "#b5ffffff"
                                     verticalAlignment: Text.AlignVCenter
                                     width: parent.width
+                                    activeFocusOnTab: true
+
+                                    Accessible.role: Accessible.EditableText
+                                    Accessible.name: "Search albums"
+                                    Accessible.description: "Type an album name and press Enter to search."
+                                    Accessible.focusable: true
+                                    Accessible.focused: activeFocus
 
                                     background: Rectangle {
                                         color: "#6C98C4" // match parent background
@@ -105,7 +115,7 @@ Rectangle {
                                     }
                                     onAccepted:
                                     {
-                                        app.searchController.doSearch(textfield.text);
+                                        mainWindow.triggerSearch();
                                     }
 
                                     onHoveredChanged: {
@@ -143,6 +153,41 @@ Rectangle {
                                 height: parent.height
                                 source: "qrc:/icons/search.svg"
                                 Layout.rightMargin: 5
+                                activeFocusOnTab: true
+
+                                Accessible.role: Accessible.Button
+                                Accessible.name: "Run search"
+                                Accessible.description: "Search using the current query."
+                                Accessible.focusable: true
+                                Accessible.focused: activeFocus
+
+                                function activateSearchButton() {
+                                    if (!enabled) {
+                                        return;
+                                    }
+                                    mainWindow.triggerSearch();
+                                }
+
+                                Keys.onReturnPressed: {
+                                    activateSearchButton();
+                                    event.accepted = true;
+                                }
+                                Keys.onEnterPressed: {
+                                    activateSearchButton();
+                                    event.accepted = true;
+                                }
+                                Keys.onSpacePressed: {
+                                    activateSearchButton();
+                                    event.accepted = true;
+                                }
+
+                                Rectangle {
+                                    anchors.fill: parent
+                                    color: "transparent"
+                                    border.width: icon.activeFocus ? 2 : 0
+                                    border.color: icon.activeFocus ? "#ffffff" : "transparent"
+                                    radius: 6
+                                }
 
                                 SequentialAnimation {
                                     id: shrinkAnim
@@ -181,10 +226,11 @@ Rectangle {
                                     anchors.rightMargin: 0
                                     anchors.topMargin: 0
                                     hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
 
                                     onClicked: {
 
-                                        app.searchController.doSearch(textfield.text);
+                                        icon.activateSearchButton();
                                     }
                                     onEntered: {
                                         growAnim.running = true;
@@ -206,6 +252,7 @@ Rectangle {
 
                         height: 40
                         label: "Add All"
+                        accessibleName: "Add all shown albums to downloads"
                         width: parent.width * 0.2
                         onClicked:
                         {
