@@ -29,9 +29,10 @@ If you like KhinsiderDownloader, feel free to leave a star on GitHub to show you
 #### Requirements
 
 -  🛠️ CMake 3.16+
--  🖼️ Qt >=6.8.3  
+-  🖼️ Qt >=6.6.3  
 -  🧰 Visual Studio 2022
--  📦 VCPKG (clone manually, preferred at `C:\vcpkg` for automatic builds. Don’t forget to run `bootstrap-vcpkg.bat`)
+-  📦 VCPKG (recommended; clone manually, preferred at `C:\vcpkg`, and run `bootstrap-vcpkg.bat`)
+-  📦 Optional alternative: a Conda `Library` root with `libcurl` and `libxml2` (set `KH_DEPS_ROOT`)
 
 Manual Building
 
@@ -40,9 +41,16 @@ git clone https://github.com/weespin/KhinsiderDownloader.git --branch experiment
 cd KhinsiderDownloader
 mkdir build
 cd build
-cmake .. -DCMAKE_PREFIX_PATH="path\to\Qt" -DCMAKE_TOOLCHAIN_FILE="path\to\vcpkg"
+cmake .. -DCMAKE_PREFIX_PATH="path\to\Qt\lib\cmake" -DCMAKE_TOOLCHAIN_FILE="path\to\vcpkg\scripts\buildsystems\vcpkg.cmake"
 cmake --build . --config Release
-"path\to\qt\bin\windeployqt.exe" --qmldir "\path\to\project\src\ui" --no-translations --release --force-openssl "\path\to\project\build\Release\appKhinsiderQT.exe"
+"path\to\qt\bin\windeployqt.exe" --qmldir "\path\to\project\src\ui" --no-translations --release "\path\to\project\build\Release\appKhinsiderQT.exe"
+```
+
+Without vcpkg:
+
+```bash
+cmake .. -DCMAKE_TOOLCHAIN_FILE= -DCMAKE_PREFIX_PATH="path\to\Qt\lib\cmake;path\to\conda\Library" -DCURL_INCLUDE_DIR="path\to\conda\Library\include" -DCURL_LIBRARY="path\to\conda\Library\lib\libcurl.lib" -DLibXml2_INCLUDE_DIR="path\to\conda\Library\include\libxml2" -DLibXml2_LIBRARY="path\to\conda\Library\lib\libxml2.lib"
+cmake --build . --config Release
 ```
 
 Automatic Building
@@ -53,11 +61,13 @@ cd KhinsiderDownloader/scripts/windows
 fullbuild.bat
 ```
 
+`scripts/windows/configure.bat` auto-detects Qt and vcpkg. If vcpkg is unavailable, it can fall back to Conda dependencies. You can override detection using `QT_CMAKE_PATH` and `KH_DEPS_ROOT`.
+
 ### Linux
 #### Requirements
 
 -  🛠️ CMake 3.16+
--  🖼️ Qt >=6.8.3
+-  🖼️ Qt >=6.6.3
   
 <details>
  <summary>Prerequisites for debian</summary>
