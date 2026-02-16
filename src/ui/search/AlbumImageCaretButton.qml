@@ -3,6 +3,33 @@ import QtQuick
 Image {
 
     signal requestImageChange()
+    property string accessibleName: mirror ? "Previous album image" : "Next album image"
+    activeFocusOnTab: true
+
+    Accessible.role: Accessible.Button
+    Accessible.name: accessibleName
+    Accessible.focusable: enabled
+    Accessible.focused: activeFocus
+
+    function activateButton() {
+        if (!enabled) {
+            return;
+        }
+        requestImageChange();
+    }
+
+    Keys.onReturnPressed: {
+        activateButton();
+        event.accepted = true;
+    }
+    Keys.onEnterPressed: {
+        activateButton();
+        event.accepted = true;
+    }
+    Keys.onSpacePressed: {
+        activateButton();
+        event.accepted = true;
+    }
 
     SequentialAnimation {
         id: shrinkAnim
@@ -21,6 +48,8 @@ Image {
     MouseArea {
         anchors.fill: parent
         hoverEnabled: true
+        enabled: arrow.enabled
+        cursorShape: Qt.PointingHandCursor
         onPressed: {
             shrinkAnim.running = true
         }
@@ -37,7 +66,7 @@ Image {
         }
         onClicked:
         {
-            requestImageChange();
+            activateButton();
         }
     }
 
@@ -45,5 +74,13 @@ Image {
     source: "qrc:/icons/arrowleft.svg"
     mirror: true
     fillMode: Image.PreserveAspectFit
+
+    Rectangle {
+        anchors.fill: parent
+        color: "transparent"
+        border.width: arrow.activeFocus ? 2 : 0
+        border.color: arrow.activeFocus ? "#ffffff" : "transparent"
+        radius: 6
+    }
 
 }

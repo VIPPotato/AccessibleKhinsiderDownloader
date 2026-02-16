@@ -4,6 +4,7 @@ Rectangle {
     signal valueChanged();
     property int selectedIndex: 0
     property alias model: internalModel
+    property string accessibleName: "Option selector"
 
     function resetModel(newItems, newIndex) {
         internalModel.clear();
@@ -26,6 +27,12 @@ Rectangle {
             buttonlabel.text = internalModel.get(selectedIndex).text;
         }
     }
+    function cycleNext() {
+        if (!enabled || internalModel.count === 0) {
+            return;
+        }
+        fadeOut.start();
+    }
 
     onSelectedIndexChanged: updateLabelText()
 
@@ -41,8 +48,17 @@ Rectangle {
     width: 40
     radius: 107
     height: 40
-    color: "#6c98c4"
+    color: mouseArea.containsMouse || activeFocus ? "#5a87b3" : "#6c98c4"
     scale: 1.0
+    border.width: activeFocus ? 2 : 0
+    border.color: activeFocus ? "#ffffff" : "transparent"
+    activeFocusOnTab: true
+
+    Accessible.role: Accessible.ComboBox
+    Accessible.name: accessibleName
+    Accessible.value: buttonlabel.text
+    Accessible.focusable: enabled
+    Accessible.focused: activeFocus
 
     Behavior on color {
         ColorAnimation {
@@ -75,11 +91,33 @@ Rectangle {
         }
     }
 
+    Keys.onReturnPressed: {
+        cycleNext();
+        event.accepted = true;
+    }
+    Keys.onEnterPressed: {
+        cycleNext();
+        event.accepted = true;
+    }
+    Keys.onSpacePressed: {
+        cycleNext();
+        event.accepted = true;
+    }
+    Keys.onUpPressed: {
+        cycleNext();
+        event.accepted = true;
+    }
+    Keys.onRightPressed: {
+        cycleNext();
+        event.accepted = true;
+    }
+
     MouseArea {
+        id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
-        onEntered: buttonRect.color = "#5a87b3"
-        onExited: buttonRect.color = "#6c98c4"
+        enabled: buttonRect.enabled
+        cursorShape: Qt.PointingHandCursor
         onPressed: {
             shrinkAnim.running = true
         }
@@ -87,7 +125,7 @@ Rectangle {
             growAnim.running = true
         }
         onClicked: {
-            fadeOut.start()
+            cycleNext();
         }
     }
 

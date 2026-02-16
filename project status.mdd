@@ -1,0 +1,14 @@
+# Project Status
+
+## Objective
+Improve the Qt app so it follows screen-reader and keyboard accessibility best practices for a PR-ready set of changes.
+
+## Progress Log
+- [x] Pass 1 completed: shared controls now expose accessibility metadata and keyboard activation.
+- [ ] Pass 2 pending: integrate explicit labels/tab flow in main/search/download/settings panels.
+- [ ] Pass 3 pending: improve delegates/dialogs and hover-only actions for full keyboard access.
+
+## Build Status
+- Attempted local build via README Windows flow.
+- `scripts/windows/configure.bat` failed because `VCPKG_ROOT` defaulted to `C:\vcpkg` and that path is missing in this environment.
+- Direct `cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=` then failed because Qt 6 CMake config is not installed (`Qt6Config.cmake` not found).

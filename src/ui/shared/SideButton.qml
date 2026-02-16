@@ -5,18 +5,56 @@ Item {
     width: 100
     height: 100
     property var iconFallback: "qrc:/icons/about.svg";
+    property string accessibleName: labelText.text
 
     // Default properties
     property alias iconSource: icon.source
     property alias label: labelText.text
     signal clicked();
     signal loaded();
+    activeFocusOnTab: true
+
+    Accessible.role: Accessible.Button
+    Accessible.name: accessibleName
+    Accessible.focusable: enabled
+    Accessible.focused: activeFocus
+
+    function activateButton() {
+        if (!enabled) {
+            return;
+        }
+        root.clicked();
+    }
+
+    Keys.onReturnPressed: {
+        activateButton();
+        event.accepted = true;
+    }
+    Keys.onEnterPressed: {
+        activateButton();
+        event.accepted = true;
+    }
+    Keys.onSpacePressed: {
+        activateButton();
+        event.accepted = true;
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        color: "transparent"
+        radius: 8
+        border.width: root.activeFocus ? 2 : 0
+        border.color: root.activeFocus ? "#ffffff" : "transparent"
+    }
+
     MouseArea
     {
         anchors.fill:parent
+        enabled: root.enabled
+        cursorShape: Qt.PointingHandCursor
         onClicked:
         {
-            root.clicked();
+            root.activateButton();
         }
     }
     Column {
