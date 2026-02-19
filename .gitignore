@@ -86,6 +86,11 @@ CMakeLists.txt.user*
 /third_party/windows/deps/*
 !/third_party/windows/deps/.gitkeep
 !/third_party/windows/deps/README.md
+/third_party/windows/qt/
+
+# Local tooling/bootstrap artifacts
+/.venv/
+/aqtinstall.log
 
 # Clion
 .idea/

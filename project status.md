@@ -42,3 +42,11 @@ Improve the Qt app so it follows screen-reader and keyboard accessibility best p
 - `build/Release/appKhinsiderQT.exe`
 - Full run `scripts/windows/clean.bat && scripts/windows/configure.bat && scripts/windows/build.bat && scripts/windows/deploy.bat` succeeds.
 - `scripts/windows/fullbuild.bat` also completes end-to-end in this environment.
+- Qt was installed locally via `aqtinstall` into:
+- `third_party/windows/qt/6.6.3/msvc2019_64`
+- Working configure override used for this environment:
+- `QT_CMAKE_PATH=third_party/windows/qt/6.6.3/msvc2019_64/lib/cmake`
+- Latest verification in this environment:
+- `scripts/windows/configure.bat` succeeded with local Qt + vendored deps.
+- `scripts/windows/build.bat` succeeded and CTest passed (`ui_accessibility_checks`).
+- `scripts/windows/deploy.bat` succeeded and packaged runtime dependencies.
