@@ -47,6 +47,8 @@ def _run_feature_checks(repo_root: Path) -> list[str]:
                 "Accessible.name: \"Search panel\"",
                 "Accessible.role: Accessible.EditableText",
                 "Accessible.name: \"Search albums\"",
+                "Qt.Key_Tab",
+                "Qt.Key_Backtab",
             ],
             "src/ui/search/SearchResultsList.qml": [
                 "Accessible.role: Accessible.List",
@@ -78,6 +80,8 @@ def _run_feature_checks(repo_root: Path) -> list[str]:
                 "Accessible.name: \"Album URLs input\"",
                 "accessibleName: \"Import URLs into download queue\"",
                 "accessibleName: \"Cancel all downloads\"",
+                "Qt.Key_Tab",
+                "Qt.Key_Backtab",
             ],
             "src/ui/download/DownloadSide.qml": [
                 "Accessible.role: Accessible.Pane",

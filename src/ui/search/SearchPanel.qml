@@ -112,6 +112,13 @@ Rectangle {
                                     Accessible.focusable: true
                                     Accessible.focused: activeFocus
 
+                                    function focusNextEditableTarget(forward) {
+                                        var nextItem = textfield.nextItemInFocusChain(forward);
+                                        if (nextItem && nextItem !== textfield) {
+                                            nextItem.forceActiveFocus();
+                                        }
+                                    }
+
                                     background: Rectangle {
                                         color: "#6C98C4" // match parent background
                                         radius: 10
@@ -119,6 +126,15 @@ Rectangle {
                                     onAccepted:
                                     {
                                         mainWindow.triggerSearch();
+                                    }
+                                    Keys.onPressed: (event) => {
+                                        if (event.key === Qt.Key_Backtab || (event.key === Qt.Key_Tab && (event.modifiers & Qt.ShiftModifier))) {
+                                            textfield.focusNextEditableTarget(false);
+                                            event.accepted = true;
+                                        } else if (event.key === Qt.Key_Tab && event.modifiers === Qt.NoModifier) {
+                                            textfield.focusNextEditableTarget(true);
+                                            event.accepted = true;
+                                        }
                                     }
 
                                     onHoveredChanged: {

@@ -91,8 +91,21 @@ Item {
                                     Accessible.focusable: true
                                     Accessible.focused: activeFocus
 
-                                    Keys.onPressed: {
-                                        if ((event.modifiers & Qt.ControlModifier) && (event.key === Qt.Key_Return || event.key === Qt.Key_Enter)) {
+                                    function focusNextEditableTarget(forward) {
+                                        var nextItem = textfield.nextItemInFocusChain(forward);
+                                        if (nextItem && nextItem !== textfield) {
+                                            nextItem.forceActiveFocus();
+                                        }
+                                    }
+
+                                    Keys.onPressed: (event) => {
+                                        if (event.key === Qt.Key_Backtab || (event.key === Qt.Key_Tab && (event.modifiers & Qt.ShiftModifier))) {
+                                            textfield.focusNextEditableTarget(false);
+                                            event.accepted = true;
+                                        } else if (event.key === Qt.Key_Tab && event.modifiers === Qt.NoModifier) {
+                                            textfield.focusNextEditableTarget(true);
+                                            event.accepted = true;
+                                        } else if ((event.modifiers & Qt.ControlModifier) && (event.key === Qt.Key_Return || event.key === Qt.Key_Enter)) {
                                             root.importBulkUrls();
                                             event.accepted = true;
                                         }
