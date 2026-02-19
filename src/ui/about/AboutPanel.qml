@@ -13,6 +13,7 @@ Rectangle {
 
     Accessible.role: Accessible.Pane
     Accessible.name: "About panel"
+    Accessible.description: "Project information, contributors list, and release links."
 
     Connections {
         target: app.aboutController
@@ -76,6 +77,8 @@ Rectangle {
                     width: parent.width
                     height: parent.height
                     spacing: 5
+                    Accessible.role: Accessible.List
+                    Accessible.name: "Contributors"
 
                     Repeater {
                         anchors.left: parent.left
@@ -93,6 +96,8 @@ Rectangle {
                             width: scrollView.width
                             height: contributorRow.height + 10
                             color: "transparent"
+                            Accessible.role: Accessible.ListItem
+                            Accessible.name: username + ", " + contributionType
 
                             RowLayout {
                                 id: contributorRow
@@ -174,6 +179,13 @@ Rectangle {
                 Keys.onSpacePressed: {
                     Qt.openUrlExternally("https://weesp.in");
                     event.accepted = true;
+                }
+                Rectangle {
+                    anchors.fill: parent
+                    color: "transparent"
+                    border.width: parent.activeFocus ? 2 : 0
+                    border.color: parent.activeFocus ? "#ffffff" : "transparent"
+                    radius: 4
                 }
             }
         }

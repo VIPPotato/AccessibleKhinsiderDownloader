@@ -11,9 +11,14 @@ if(WIN32)
 endif()
 
 project(KhinsiderQT VERSION 0.1 LANGUAGES CXX)
+include(CTest)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+if(BUILD_TESTING)
+    find_package(Python3 REQUIRED COMPONENTS Interpreter)
+endif()
 
 if(MSVC)
     add_compile_options("/Zc:__cplusplus" "/permissive-")
@@ -146,3 +151,14 @@ install(TARGETS appKhinsiderQT
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+if(BUILD_TESTING)
+    add_test(
+            NAME ui_accessibility_checks
+            COMMAND
+            ${Python3_EXECUTABLE}
+            ${CMAKE_CURRENT_SOURCE_DIR}/scripts/shared/accessibility_tests.py
+            --repo-root
+            ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+endif()

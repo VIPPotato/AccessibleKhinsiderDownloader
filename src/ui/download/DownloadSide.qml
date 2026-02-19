@@ -10,6 +10,7 @@ Rectangle
 
        Accessible.role: Accessible.Pane
        Accessible.name: "Download queue panel"
+       Accessible.description: "Shows queued albums and live download status."
 
        WScrollView
        {
@@ -26,6 +27,7 @@ Rectangle
               {
                      Accessible.role: Accessible.List
                      Accessible.name: "Download queue list"
+                     Accessible.description: "Each item reports status, progress, and actions."
 
                      width: root.width * 0.92;
                      height: root.height;

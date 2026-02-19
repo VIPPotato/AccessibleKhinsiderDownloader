@@ -8,6 +8,9 @@ Rectangle {
     id: mainWindow
     height : 500
     color: "#2c3e50"
+    Accessible.role: Accessible.Pane
+    Accessible.name: "Search panel"
+    Accessible.description: "Search for albums and add selected results to the download queue."
     function triggerSearch() {
         app.searchController.doSearch(textfield.text);
     }
@@ -253,6 +256,7 @@ Rectangle {
                         height: 40
                         label: "Add All"
                         accessibleName: "Add all shown albums to downloads"
+                        accessibleDescription: "Add every current search result to the download queue."
                         width: parent.width * 0.2
                         onClicked:
                         {

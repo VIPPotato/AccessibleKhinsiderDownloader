@@ -4,10 +4,12 @@ Image {
 
     signal requestImageChange()
     property string accessibleName: "Change album image"
+    property string accessibleDescription: ""
     activeFocusOnTab: true
 
     Accessible.role: Accessible.Button
     Accessible.name: accessibleName
+    Accessible.description: accessibleDescription
     Accessible.focusable: enabled
     Accessible.focused: activeFocus
 

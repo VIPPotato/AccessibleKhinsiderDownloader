@@ -9,6 +9,9 @@ Rectangle {
     color: "#2c3e50"
     height: 700
     width: 400
+    Accessible.role: Accessible.Pane
+    Accessible.name: "Settings panel"
+    Accessible.description: "Configure download path, logging, performance, and content preferences."
     function openLocalFolder(path) {
         if (!path || path.length === 0) {
             return;
@@ -47,6 +50,8 @@ Rectangle {
                 height: parent.height
                 radius: 10
                 width: parent.width * 0.7
+                border.width: downloadPathText.activeFocus ? 2 : 0
+                border.color: downloadPathText.activeFocus ? "#ffffff" : "transparent"
 
                 Text {
                     id: downloadPathText
@@ -94,6 +99,7 @@ Rectangle {
                 height: parent.height
                 label: "Select Path"
                 accessibleName: "Select download path"
+                accessibleDescription: "Open a folder picker to choose where downloads are saved."
                 width: parent.width * 0.25
 
                 onClicked: {
@@ -123,6 +129,8 @@ Rectangle {
                         font.pointSize: 12
                         text: "Enable Logging"
                         verticalAlignment: Text.AlignVCenter
+                        Accessible.role: Accessible.StaticText
+                        Accessible.name: "Enable logging"
                     }
                     Item {
                         Layout.fillWidth: true
@@ -164,6 +172,13 @@ Rectangle {
                                 root.openLocalFolder(app.logController.logDir);
                             }
                         }
+                        Rectangle {
+                            anchors.fill: parent
+                            color: "transparent"
+                            border.width: openLogPathText.activeFocus ? 2 : 0
+                            border.color: openLogPathText.activeFocus ? "#ffffff" : "transparent"
+                            radius: 4
+                        }
                     }
                 }
 
@@ -174,6 +189,7 @@ Rectangle {
                 width: parent.parent.width * 0.25
                 fontSize: 13
                 accessibleName: "Enable logging"
+                accessibleDescription: "Turn detailed log output on or off."
                 onValueChanged:
                 {
                     app.settings.setEnableLogging(selectedIndex != 0);
@@ -210,6 +226,7 @@ Rectangle {
                 currentNumber: app.settings.downloadThreads
                 nextNumber: app.settings.downloadThreads
                 accessibleName: "Download threads"
+                accessibleDescription: "Number of download worker threads."
                 onValueChanged:
                 {
                     app.settings.setDownloadThreads(currentNumber);
@@ -261,6 +278,7 @@ Rectangle {
                 currentNumber: app.settings.maxConcurrentDownloadsPerThread
                 nextNumber: app.settings.maxConcurrentDownloadsPerThread
                 accessibleName: "Concurrent downloads per thread"
+                accessibleDescription: "Maximum simultaneous album downloads per worker thread."
                 onValueChanged:
                 {
                     app.settings.setMaxConcurrentDownloadsPerThread(currentNumber);
@@ -296,6 +314,7 @@ Rectangle {
                 width: parent.width * 0.25
                 fontSize: 13
                 accessibleName: "Audio quality"
+                accessibleDescription: "Preferred quality when a format choice is available."
                 onValueChanged:
                 {
                     app.settings.setPreferredAudioQualityInt(selectedIndex);
@@ -333,6 +352,7 @@ Rectangle {
                 width: parent.width * 0.25
                 fontSize: 13
                 accessibleName: "Download art covers"
+                accessibleDescription: "Choose whether to download album cover artwork."
                 onValueChanged:
                 {
                     app.settings.setDownloadArt(selectedIndex != 0);
@@ -375,6 +395,7 @@ Rectangle {
                 width: parent.width * 0.25
                 fontSize: 13
                 accessibleName: "Skip downloaded files"
+                accessibleDescription: "Skip songs that already exist in the destination folder."
                 onValueChanged:
                 {
                     app.settings.setSkipDownloaded(selectedIndex != 0);
@@ -416,6 +437,7 @@ Rectangle {
                 width: parent.width * 0.25
                 fontSize: 13
                 accessibleName: "Check for updates"
+                accessibleDescription: "Check GitHub for a newer app release."
                 onClicked:
                 {
                     app.aboutController.checkForUpdates();

@@ -11,6 +11,7 @@ Rectangle {
 
     Accessible.role: Accessible.Pane
     Accessible.name: "Selected album details"
+    Accessible.description: "Album information and format download actions for the selected search result."
 
     ColumnLayout {
         anchors.fill:parent
@@ -51,6 +52,9 @@ Rectangle {
                         width: parent.width
                         horizontalAlignment: Text.AlignLeft
                         verticalAlignment: Text.AlignVCenter
+                        Accessible.role: Accessible.StaticText
+                        Accessible.name: modelData.label
+                        Accessible.description: modelData.value
                     }
                 }
 
@@ -77,6 +81,7 @@ Rectangle {
                         anchors.horizontalCenter: parent.horizontalCenter
                         label: "Add " + modelData
                         accessibleName: "Add album as " + modelData
+                        accessibleDescription: "Add the selected album to downloads in " + modelData + " format."
                         opacity:0
                         Behavior on opacity {
                             NumberAnimation {

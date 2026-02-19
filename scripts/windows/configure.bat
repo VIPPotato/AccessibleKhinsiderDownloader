@@ -56,7 +56,7 @@ echo Using Qt from: !QT_MSVC_PATH!
 
 if !USE_VCPKG!==true (
     echo Using vcpkg from: "%VCPKG_ROOT%"
-    cmake -S "!PROJECT_DIR!" -B "!BUILD_DIR!" -DCMAKE_TOOLCHAIN_FILE="%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" -DCMAKE_PREFIX_PATH="!QT_MSVC_PATH!"
+    cmake -S "!PROJECT_DIR!" -B "!BUILD_DIR!" -DBUILD_TESTING=ON -DCMAKE_TOOLCHAIN_FILE="%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" -DCMAKE_PREFIX_PATH="!QT_MSVC_PATH!"
     exit /b %errorlevel%
 )
 
@@ -79,6 +79,7 @@ if not exist "!LIBXML_LIBRARY!" set "LIBXML_LIBRARY=!DEPS_ROOT!\lib\xml2.lib"
 
 echo Using fallback dependencies from: !DEPS_ROOT!
 cmake -S "!PROJECT_DIR!" -B "!BUILD_DIR!" ^
+ -DBUILD_TESTING=ON ^
  -DCMAKE_TOOLCHAIN_FILE= ^
  -DCMAKE_PREFIX_PATH="!QT_MSVC_PATH!;!DEPS_ROOT!" ^
  -DCURL_INCLUDE_DIR="!DEPS_ROOT!\include" ^

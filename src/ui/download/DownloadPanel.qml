@@ -7,6 +7,9 @@ Item {
     //todo: show speed per album, MB/MB stop button (delete)
     width: 800
     height: 600
+    Accessible.role: Accessible.Pane
+    Accessible.name: "Download panel"
+    Accessible.description: "Import album URLs and control the download queue."
     function importBulkUrls() {
         app.downloaderController.downloaderVM.addToDownloadList(textfield.text);
         textfield.text = "";
@@ -137,6 +140,7 @@ Item {
                         Layout.preferredWidth: parent.width * 0.8
                         label: "Import"
                         accessibleName: "Import URLs into download queue"
+                        accessibleDescription: "Import the URLs entered above into the download queue."
                         onClicked:
                         {
                             root.importBulkUrls();
@@ -149,6 +153,7 @@ Item {
                         Layout.preferredWidth: parent.width * 0.8
                         Layout.alignment: Qt.AlignCenter
                         accessibleName: "Cancel all downloads"
+                        accessibleDescription: "Stop every active and queued download."
                         onClicked:
                         {
                             root.cancelAllDownloads();

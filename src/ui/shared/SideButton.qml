@@ -6,6 +6,7 @@ Item {
     height: 100
     property var iconFallback: "qrc:/icons/about.svg";
     property string accessibleName: labelText.text
+    property string accessibleDescription: ""
 
     // Default properties
     property alias iconSource: icon.source
@@ -16,6 +17,7 @@ Item {
 
     Accessible.role: Accessible.Button
     Accessible.name: accessibleName
+    Accessible.description: accessibleDescription
     Accessible.focusable: enabled
     Accessible.focused: activeFocus
 
@@ -69,6 +71,7 @@ Item {
             source:  "../../../icons/about.svg" // default icon
             anchors.horizontalCenter: parent.horizontalCenter
             fillMode: Image.PreserveAspectFit
+            Accessible.ignored: true
             onStatusChanged: {
                   if (status === Image.Error) {
                       source = iconFallback;
@@ -86,6 +89,7 @@ Item {
             width: parent.width
             horizontalAlignment: Text.AlignHCenter
             color: "white"
+            Accessible.ignored: true
         }
 
     }

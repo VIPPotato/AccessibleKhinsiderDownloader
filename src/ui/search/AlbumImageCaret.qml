@@ -10,10 +10,26 @@ ColumnLayout{
     property int imageIndex: 0
     property int imageTarget : 0
     property var imageSources: app.searchController.albumInfoVM.albumImages
+    activeFocusOnTab: true
 
     Accessible.role: Accessible.Pane
     Accessible.name: "Album artwork viewer"
     Accessible.description: "Use previous and next image buttons to switch artwork."
+
+    Keys.onLeftPressed: {
+        if (col.imageSources.length > 1) {
+            col.imageTarget--;
+            fadeOut.start();
+        }
+        event.accepted = true;
+    }
+    Keys.onRightPressed: {
+        if (col.imageSources.length > 1) {
+            col.imageTarget++;
+            fadeOut.start();
+        }
+        event.accepted = true;
+    }
 
     Connections {
         target: app.searchController.albumInfoVM
@@ -75,6 +91,7 @@ ColumnLayout{
             source: col.imageSources.length > 0 ? col.imageSources[col.imageIndex] : "qrc:/icons/albumplaceholder.jpg"
             //source: "icons/albumplaceholder.jpg"
             fillMode: Image.PreserveAspectFit
+            Accessible.ignored: true
             layer.enabled: true
             layer.effect: OpacityMask{
                 maskSource: Item{
@@ -129,6 +146,9 @@ ColumnLayout{
                 antialiasing: true
                 color: "#ce60f7ff"
             }
+            Accessible.role: Accessible.StaticText
+            Accessible.name: running ? "Loading album artwork" : "Album artwork loaded"
+            Accessible.ignored: !visible
         }
     }
 
@@ -148,6 +168,7 @@ ColumnLayout{
                 height: parent.height
                 mirror: false
                 accessibleName: "Previous album image"
+                accessibleDescription: "Show the previous artwork image."
                 onRequestImageChange:
                 {
                     if(col.imageSources.length > 1)
@@ -216,6 +237,7 @@ ColumnLayout{
                 width: parent.width*0.2
                 height: parent.height
                 accessibleName: "Next album image"
+                accessibleDescription: "Show the next artwork image."
                 onRequestImageChange:
                 {
                     if(col.imageSources.length > 1)

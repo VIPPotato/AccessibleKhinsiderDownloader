@@ -71,7 +71,7 @@ Item {
 
                     Accessible.role: Accessible.ListItem
                     Accessible.name: model.name
-                    Accessible.description: isSelected ? "Selected" : "Not selected"
+                    Accessible.description: "Result " + (index + 1) + " of " + resultRepeater.count + ". " + (isSelected ? "Selected" : "Not selected")
                     Accessible.focusable: true
                     Accessible.focused: activeFocus
 
@@ -93,6 +93,14 @@ Item {
                     }
                     Keys.onDownPressed: {
                         root.focusResult(index + 1);
+                        event.accepted = true;
+                    }
+                    Keys.onHomePressed: {
+                        root.focusResult(0);
+                        event.accepted = true;
+                    }
+                    Keys.onEndPressed: {
+                        root.focusResult(resultRepeater.count - 1);
                         event.accepted = true;
                     }
 

@@ -22,7 +22,7 @@ Item {
 
     Accessible.role: Accessible.ListItem
     Accessible.name: albumName.text
-    Accessible.description: "State: " + root.state + ". Progress " + percentageBar.percentage + " percent. " + filesLabel.text + ". " + downloadStatus.text
+    Accessible.description: "State: " + root.state + ". Progress " + percentageBar.percentage + " percent. " + filesLabel.text + ". " + downloadStatus.text + ". Press Delete to cancel or R to retry when available."
     Accessible.focusable: true
     Accessible.focused: activeFocus
 

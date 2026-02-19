@@ -6,6 +6,7 @@ Rectangle {
     property int currentNumber : 0
     property int nextNumber : 0
     property string accessibleName: "Number selector"
+    property string accessibleDescription: ""
     signal valueChanged();
     id: buttonRect
     width: parent.width * 0.5
@@ -19,6 +20,9 @@ Rectangle {
 
     Accessible.role: Accessible.SpinBox
     Accessible.name: accessibleName
+    Accessible.description: accessibleDescription.length > 0
+                            ? accessibleDescription
+                            : "Range from " + minNumber + " to " + maxNumber + ". Use arrow keys, Home, or End."
     Accessible.value: currentNumber.toString()
     Accessible.focusable: enabled
     Accessible.focused: activeFocus
@@ -69,6 +73,14 @@ Rectangle {
     }
     Keys.onEndPressed: {
         commitNextValue(maxNumber);
+        event.accepted = true;
+    }
+    Keys.onPageUpPressed: {
+        commitNextValue(nextNumber + 10);
+        event.accepted = true;
+    }
+    Keys.onPageDownPressed: {
+        commitNextValue(nextNumber - 10);
         event.accepted = true;
     }
 
@@ -129,6 +141,7 @@ Rectangle {
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             font.pointSize: 16
+            Accessible.ignored: true
         }
         WNumberBoxButton
         {

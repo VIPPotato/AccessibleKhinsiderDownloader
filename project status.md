@@ -30,6 +30,10 @@ Improve the Qt app so it follows screen-reader and keyboard accessibility best p
 - `scripts/windows/configure.bat` now uses `LIBXML2_*` cache variables (not `LibXml2_*`) and absolute project paths, so configure works from repo root and picks vendored libxml2 correctly.
 - `scripts/windows/build.bat`, `clean.bat`, `fullbuild.bat`, and `fullbuildandcreateinstaller.bat` now resolve paths via `%~dp0`/absolute project paths.
 - `scripts/windows/deploy.bat` now copies VC runtime DLLs from detected VC redist folders or `%SystemRoot%\System32` fallback.
+- Added `scripts/shared/accessibility_tests.py` with feature-level accessibility assertions (navigation, search, download, settings, about, shared controls).
+- `CMakeLists.txt` now registers `ui_accessibility_checks` in CTest.
+- `scripts/windows/build.bat` now executes CTest automatically after each compile.
+- Additional accessibility hardening added across QML panels/components (panel roles/names/descriptions, keyboard parity, and clearer control semantics).
 - Local verification now passes with:
 - `scripts/windows/configure.bat`
 - `scripts/windows/build.bat`

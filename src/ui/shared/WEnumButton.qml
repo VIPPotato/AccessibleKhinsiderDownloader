@@ -5,6 +5,7 @@ Rectangle {
     property int selectedIndex: 0
     property alias model: internalModel
     property string accessibleName: "Option selector"
+    property string accessibleDescription: ""
 
     function resetModel(newItems, newIndex) {
         internalModel.clear();
@@ -33,6 +34,14 @@ Rectangle {
         }
         fadeOut.start();
     }
+    function cyclePrevious() {
+        if (!enabled || internalModel.count === 0) {
+            return;
+        }
+        selectedIndex = (selectedIndex - 1 + internalModel.count) % internalModel.count;
+        valueChanged();
+        fadeIn.start();
+    }
 
     onSelectedIndexChanged: updateLabelText()
 
@@ -56,6 +65,9 @@ Rectangle {
 
     Accessible.role: Accessible.ComboBox
     Accessible.name: accessibleName
+    Accessible.description: accessibleDescription.length > 0
+                            ? accessibleDescription
+                            : "Use Enter, Space, or arrow keys to change option."
     Accessible.value: buttonlabel.text
     Accessible.focusable: enabled
     Accessible.focused: activeFocus
@@ -111,6 +123,14 @@ Rectangle {
         cycleNext();
         event.accepted = true;
     }
+    Keys.onDownPressed: {
+        cyclePrevious();
+        event.accepted = true;
+    }
+    Keys.onLeftPressed: {
+        cyclePrevious();
+        event.accepted = true;
+    }
 
     MouseArea {
         id: mouseArea
@@ -141,6 +161,7 @@ Rectangle {
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         font.pointSize: 10
+        Accessible.ignored: true
     }
 
     Component.onCompleted: {

@@ -49,7 +49,7 @@ cmake --build . --config Release
 Without vcpkg:
 
 ```bash
-cmake .. -DCMAKE_TOOLCHAIN_FILE= -DCMAKE_PREFIX_PATH="path\to\Qt\lib\cmake;path\to\conda\Library" -DCURL_INCLUDE_DIR="path\to\conda\Library\include" -DCURL_LIBRARY="path\to\conda\Library\lib\libcurl.lib" -DLibXml2_INCLUDE_DIR="path\to\conda\Library\include\libxml2" -DLibXml2_LIBRARY="path\to\conda\Library\lib\libxml2.lib"
+cmake .. -DCMAKE_TOOLCHAIN_FILE= -DCMAKE_PREFIX_PATH="path\to\Qt\lib\cmake;path\to\conda\Library" -DCURL_INCLUDE_DIR="path\to\conda\Library\include" -DCURL_LIBRARY="path\to\conda\Library\lib\libcurl.lib" -DLIBXML2_INCLUDE_DIR="path\to\conda\Library\include\libxml2" -DLIBXML2_LIBRARY="path\to\conda\Library\lib\libxml2.lib"
 cmake --build . --config Release
 ```
 
@@ -70,6 +70,7 @@ fullbuild.bat
 
 Use `scripts/windows/vendor-deps.bat` to populate `third_party/windows/deps`.
 You can still override detection using `QT_CMAKE_PATH` and `KH_DEPS_ROOT`.
+`scripts/windows/build.bat` now runs CTest automatically after compiling, including accessibility checks.
 
 ### Linux
 #### Requirements

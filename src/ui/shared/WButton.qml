@@ -8,6 +8,7 @@ Rectangle {
 
     property alias fontSize : buttonlabel.font.pointSize
     property string accessibleName: buttonlabel.text
+    property string accessibleDescription: ""
     color: mouseArea.containsMouse || activeFocus ? "#5a87b3" : "#6c98c4"
     height: 40
     //width: parent.width * 0.5
@@ -19,6 +20,7 @@ Rectangle {
 
     Accessible.role: Accessible.Button
     Accessible.name: accessibleName
+    Accessible.description: accessibleDescription
     Accessible.focusable: enabled
     Accessible.focused: activeFocus
 
@@ -85,7 +87,7 @@ Rectangle {
         }
         onClicked:
         {
-            buttonRect.clicked();
+            buttonRect.activateButton();
         }
     }
     Text {
@@ -101,5 +103,6 @@ Rectangle {
         horizontalAlignment: Text.AlignHCenter
         text: "Add FLAC"
         verticalAlignment: Text.AlignVCenter
+        Accessible.ignored: true
     }
 }

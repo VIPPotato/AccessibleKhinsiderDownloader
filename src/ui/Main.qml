@@ -23,6 +23,9 @@ Window {
     visible: true
     color: "#2c3e50"
     title: qsTr("Khinsider Downloader - QT")
+    Accessible.role: Accessible.Application
+    Accessible.name: "Khinsider Downloader"
+    Accessible.description: "Main application window. Use Ctrl+1 for Download, Ctrl+2 for Search, Ctrl+3 for Settings, and Ctrl+4 for About."
     function setActiveTab(targetState, button) {
         maincol.state = targetState;
         slider.jump(button);
@@ -158,6 +161,7 @@ Window {
                         iconSource: "qrc:/icons/dl.svg"
                         label: "Download"
                         accessibleName: maincol.state === "downloadtab" ? "Download tab, selected" : "Download tab"
+                        accessibleDescription: "Open the download queue and bulk URL import tools."
                         onClicked: {
                             window.setActiveTab("downloadtab", leftdownloadbutton);
                         }
@@ -172,6 +176,7 @@ Window {
                         iconSource: "qrc:/icons/search.svg"
                         label: "Search"
                         accessibleName: maincol.state === "searchtab" ? "Search tab, selected" : "Search tab"
+                        accessibleDescription: "Search albums and add them to the download queue."
                         onClicked: {
                             window.setActiveTab("searchtab", leftsearchbutton);
                         }
@@ -185,6 +190,7 @@ Window {
                         iconSource: "qrc:/icons/settings.svg"
                         label: "Settings"
                         accessibleName: maincol.state === "settingstab" ? "Settings tab, selected" : "Settings tab"
+                        accessibleDescription: "Configure app behavior and download preferences."
                         onClicked: {
                             window.setActiveTab("settingstab", leftsettingsbutton);
                         }
@@ -202,6 +208,7 @@ Window {
                         iconSource: "qrc:/icons/about.svg"
                         label: "About"
                         accessibleName: maincol.state === "abouttab" ? "About tab, selected" : "About tab"
+                        accessibleDescription: "View version, contributors, and update information."
                         onClicked: {
                             window.setActiveTab("abouttab", leftaboutbutton);
                         }
