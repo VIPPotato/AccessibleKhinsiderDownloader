@@ -108,6 +108,7 @@ def _run_feature_checks(repo_root: Path) -> list[str]:
             ],
             "src/ui/shared/WEnumButton.qml": [
                 "Accessible.role: Accessible.ComboBox",
+                "Accessible.valueChanged()",
                 "Keys.onUpPressed",
                 "Keys.onDownPressed",
                 "Keys.onLeftPressed",

@@ -43,7 +43,12 @@ Rectangle {
         fadeIn.start();
     }
 
-    onSelectedIndexChanged: updateLabelText()
+    onSelectedIndexChanged: {
+        updateLabelText();
+        if (activeFocus) {
+            Accessible.valueChanged();
+        }
+    }
 
     ListModel {
         id: internalModel
@@ -64,7 +69,7 @@ Rectangle {
     activeFocusOnTab: true
 
     Accessible.role: Accessible.ComboBox
-    Accessible.name: accessibleName
+    Accessible.name: accessibleName + ": " + buttonlabel.text
     Accessible.description: (accessibleDescription.length > 0
                              ? accessibleDescription
                              : "Use Enter, Space, or arrow keys to change option.")
