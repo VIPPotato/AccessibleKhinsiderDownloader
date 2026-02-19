@@ -27,7 +27,7 @@ def _run_feature_checks(repo_root: Path) -> list[str]:
     feature_specs: dict[str, dict[str, list[str]]] = {
         "navigation": {
             "src/ui/Main.qml": [
-                "Accessible.role: Accessible.Application",
+                "Accessible.role: Accessible.Pane",
                 "Accessible.name: \"Khinsider Downloader\"",
                 "setActiveTab(",
                 "Keys.onPressed",
@@ -88,7 +88,9 @@ def _run_feature_checks(repo_root: Path) -> list[str]:
                 "Accessible.role: Accessible.ListItem",
                 "Accessible.name: \"Retry album download\"",
                 "Accessible.name: \"Cancel album download\"",
-                "Keys.onDeletePressed",
+                "Keys.onPressed",
+                "Qt.Key_Delete",
+                "Qt.Key_R",
             ],
         },
         "settings": {
@@ -111,8 +113,9 @@ def _run_feature_checks(repo_root: Path) -> list[str]:
                 "Accessible.role: Accessible.SpinBox",
                 "Keys.onUpPressed",
                 "Keys.onDownPressed",
-                "Keys.onHomePressed",
-                "Keys.onEndPressed",
+                "Keys.onPressed",
+                "Qt.Key_Home",
+                "Qt.Key_End",
             ],
         },
         "about": {
@@ -124,8 +127,9 @@ def _run_feature_checks(repo_root: Path) -> list[str]:
                 "Accessible.role: Accessible.Link",
             ],
             "src/ui/about/UpdateCheckerDialog.qml": [
-                "Accessible.role: Accessible.Dialog",
-                "Accessible.name: title",
+                "title: \"A new update has been released!\"",
+                "Accessible.role: Accessible.StaticText",
+                "accessibleName: \"Open downloads page\"",
                 "Keys.onEscapePressed",
             ],
         },
@@ -220,4 +224,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-

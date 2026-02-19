@@ -15,9 +15,6 @@ Window {
     signal accepted
     title: "A new update has been released!"
     Component.onCompleted: okButton.forceActiveFocus()
-    Accessible.role: Accessible.Dialog
-    Accessible.name: title
-    Accessible.description: "A new release is available. Activate OK to open the downloads page."
     Keys.onEscapePressed: {
         window.visible = false;
         event.accepted = true;

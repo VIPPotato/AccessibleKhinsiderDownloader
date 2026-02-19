@@ -20,10 +20,10 @@ Rectangle {
 
     Accessible.role: Accessible.SpinBox
     Accessible.name: accessibleName
-    Accessible.description: accessibleDescription.length > 0
-                            ? accessibleDescription
-                            : "Range from " + minNumber + " to " + maxNumber + ". Use arrow keys, Home, or End."
-    Accessible.value: currentNumber.toString()
+    Accessible.description: (accessibleDescription.length > 0
+                             ? accessibleDescription
+                             : "Range from " + minNumber + " to " + maxNumber + ". Use arrow keys, Home, End, Page Up, or Page Down.")
+                            + " Current value: " + currentNumber
     Accessible.focusable: enabled
     Accessible.focused: activeFocus
 
@@ -67,21 +67,20 @@ Rectangle {
         decreaseValue();
         event.accepted = true;
     }
-    Keys.onHomePressed: {
-        commitNextValue(minNumber);
-        event.accepted = true;
-    }
-    Keys.onEndPressed: {
-        commitNextValue(maxNumber);
-        event.accepted = true;
-    }
-    Keys.onPageUpPressed: {
-        commitNextValue(nextNumber + 10);
-        event.accepted = true;
-    }
-    Keys.onPageDownPressed: {
-        commitNextValue(nextNumber - 10);
-        event.accepted = true;
+    Keys.onPressed: (event) => {
+        if (event.key === Qt.Key_Home) {
+            commitNextValue(minNumber);
+            event.accepted = true;
+        } else if (event.key === Qt.Key_End) {
+            commitNextValue(maxNumber);
+            event.accepted = true;
+        } else if (event.key === Qt.Key_PageUp) {
+            commitNextValue(nextNumber + 10);
+            event.accepted = true;
+        } else if (event.key === Qt.Key_PageDown) {
+            commitNextValue(nextNumber - 10);
+            event.accepted = true;
+        }
     }
 
     Behavior on color {

@@ -1,5 +1,4 @@
 import QtQuick 2.15
-import Qt5Compat.GraphicalEffects
 import QtQuick.Layouts
 
 Item {
@@ -55,17 +54,14 @@ Item {
         downloadStatus.text = "Speed: " + formatSpeed(speedInBytes);
     }
 
-    Keys.onDeletePressed: {
-        requestCancel();
-        event.accepted = true;
-    }
-    Keys.onBackspacePressed: {
-        requestCancel();
-        event.accepted = true;
-    }
-    Keys.onRPressed: {
-        requestRetry();
-        event.accepted = true;
+    Keys.onPressed: (event) => {
+        if (event.key === Qt.Key_Delete || event.key === Qt.Key_Backspace) {
+            requestCancel();
+            event.accepted = true;
+        } else if (event.key === Qt.Key_R) {
+            requestRetry();
+            event.accepted = true;
+        }
     }
 
     states: [
@@ -128,19 +124,6 @@ Item {
             cursorShape: Qt.PointingHandCursor
             onClicked: {
                 root.forceActiveFocus();
-            }
-        }
-
-        layer.enabled: true
-        layer.effect: OpacityMask {
-            maskSource: Item {
-                width: mainRect.width
-                height: mainRect.height
-                Rectangle {
-                    width: parent.width
-                    height: parent.height
-                    radius: 20
-                }
             }
         }
 
@@ -273,11 +256,6 @@ Item {
                             event.accepted = true;
                         }
 
-                        ColorOverlay {
-                            anchors.fill: parent
-                            source: parent
-                            color: "white"
-                        }
                         MouseArea {
                             hoverEnabled: false
                             width: parent.width

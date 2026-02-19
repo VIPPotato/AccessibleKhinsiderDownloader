@@ -95,13 +95,14 @@ Item {
                         root.focusResult(index + 1);
                         event.accepted = true;
                     }
-                    Keys.onHomePressed: {
-                        root.focusResult(0);
-                        event.accepted = true;
-                    }
-                    Keys.onEndPressed: {
-                        root.focusResult(resultRepeater.count - 1);
-                        event.accepted = true;
+                    Keys.onPressed: (event) => {
+                        if (event.key === Qt.Key_Home) {
+                            root.focusResult(0);
+                            event.accepted = true;
+                        } else if (event.key === Qt.Key_End) {
+                            root.focusResult(resultRepeater.count - 1);
+                            event.accepted = true;
+                        }
                     }
 
                     Behavior on scale {

@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Controls
-import Qt5Compat.GraphicalEffects
 import QtQuick.Layouts
 
 ColumnLayout{
@@ -46,7 +45,6 @@ ColumnLayout{
             {
                 blur.radius = 30;
             }
-            blur.source = profileImage;
         }
     }
     Item {
@@ -92,44 +90,19 @@ ColumnLayout{
             //source: "icons/albumplaceholder.jpg"
             fillMode: Image.PreserveAspectFit
             Accessible.ignored: true
-            layer.enabled: true
-            layer.effect: OpacityMask{
-                maskSource: Item{
-                    width: profileImage.width
-                    height: profileImage.height
-                    Rectangle{
-                        anchors.centerIn: parent
-                        width: Math.min(profileImage.width, profileImage.height)
-                        height: width
-                        radius: 10
-                    }
-                }
-            }
 
         }
-        FastBlur {
+        Rectangle {
             id: blur
-            cached:false
             anchors.fill: profileImage
-            source: profileImage
+            color: "#8c2c3e50"
             radius: 30
+            visible: radius > 0
+            opacity: visible ? 1 : 0
             Behavior on radius {
                 NumberAnimation {
                     duration: 100
                     easing.type: Easing.InOutQuad
-                }
-            }
-            layer.enabled: true
-            layer.effect: OpacityMask{
-                maskSource: Item{
-                    width: profileImage.width
-                    height: profileImage.height
-                    Rectangle{
-                        anchors.centerIn: parent
-                        width: Math.min(profileImage.width, profileImage.height)
-                        height: width
-                        radius: 10
-                    }
                 }
             }
         }
@@ -140,11 +113,6 @@ ColumnLayout{
                 if (!app.searchController.albumInfoVM.currentAlbum)
                     return false;
                 return !app.searchController.albumInfoVM.currentAlbum.isInfoParsed || profileImage.progress !== 1;
-            }
-            layer.enabled: true
-            layer.effect:ColorOverlay{
-                antialiasing: true
-                color: "#ce60f7ff"
             }
             Accessible.role: Accessible.StaticText
             Accessible.name: running ? "Loading album artwork" : "Album artwork loaded"

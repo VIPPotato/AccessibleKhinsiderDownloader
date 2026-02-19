@@ -65,10 +65,10 @@ Rectangle {
 
     Accessible.role: Accessible.ComboBox
     Accessible.name: accessibleName
-    Accessible.description: accessibleDescription.length > 0
-                            ? accessibleDescription
-                            : "Use Enter, Space, or arrow keys to change option."
-    Accessible.value: buttonlabel.text
+    Accessible.description: (accessibleDescription.length > 0
+                             ? accessibleDescription
+                             : "Use Enter, Space, or arrow keys to change option.")
+                            + " Current value: " + buttonlabel.text
     Accessible.focusable: enabled
     Accessible.focused: activeFocus
 

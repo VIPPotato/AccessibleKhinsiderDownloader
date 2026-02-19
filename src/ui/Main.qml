@@ -23,9 +23,6 @@ Window {
     visible: true
     color: "#2c3e50"
     title: qsTr("Khinsider Downloader - QT")
-    Accessible.role: Accessible.Application
-    Accessible.name: "Khinsider Downloader"
-    Accessible.description: "Main application window. Use Ctrl+1 for Download, Ctrl+2 for Search, Ctrl+3 for Settings, and Ctrl+4 for About."
     function setActiveTab(targetState, button) {
         maincol.state = targetState;
         slider.jump(button);
@@ -56,6 +53,9 @@ Window {
     Column {
         id: maincol
         state: "downloadtab"
+        Accessible.role: Accessible.Pane
+        Accessible.name: "Khinsider Downloader"
+        Accessible.description: "Main application view. Use Ctrl+1 for Download, Ctrl+2 for Search, Ctrl+3 for Settings, and Ctrl+4 for About."
         states: [
             State {
                 name: "downloadtab" //centerPanel
