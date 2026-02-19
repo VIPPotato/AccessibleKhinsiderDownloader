@@ -50,3 +50,15 @@ Improve the Qt app so it follows screen-reader and keyboard accessibility best p
 - `scripts/windows/configure.bat` succeeded with local Qt + vendored deps.
 - `scripts/windows/build.bat` succeeded and CTest passed (`ui_accessibility_checks`).
 - `scripts/windows/deploy.bat` succeeded and packaged runtime dependencies.
+- 2026-02-19 startup fix:
+- Root cause of immediate exit (`-1`) was QML object creation failure from invalid accessibility/key snippets and a missing local `Qt5Compat.GraphicalEffects` module.
+- Removed `Qt5Compat.GraphicalEffects` dependency from `AlbumItem.qml` and `AlbumImageCaret.qml` and replaced those effects with runtime-safe QtQuick primitives.
+- Replaced unsupported handlers/properties:
+- `Keys.onBackspacePressed`, `Keys.onRPressed`, `Keys.onHomePressed`, `Keys.onEndPressed`, `Keys.onPageUpPressed`, `Keys.onPageDownPressed` -> `Keys.onPressed` key routing.
+- `Accessible.value` removed from custom controls and value text moved into `Accessible.description`.
+- Removed invalid `Accessible.*` on `Window` roots (`Main.qml`, `UpdateCheckerDialog.qml`) and moved main-window semantics to an `Item` root (`maincol`).
+- Updated `scripts/shared/accessibility_tests.py` to assert the corrected, Qt-valid accessibility patterns.
+- Verification for this pass:
+- `scripts/windows/build.bat` succeeded and CTest passed (`ui_accessibility_checks`).
+- `scripts/windows/deploy.bat` succeeded.
+- `build/Release/appKhinsiderQT.exe` was launched successfully and remained running during a 4-second startup check.
