@@ -62,3 +62,14 @@ Improve the Qt app so it follows screen-reader and keyboard accessibility best p
 - `scripts/windows/build.bat` succeeded and CTest passed (`ui_accessibility_checks`).
 - `scripts/windows/deploy.bat` succeeded.
 - `build/Release/appKhinsiderQT.exe` was launched successfully and remained running during a 4-second startup check.
+- 2026-02-19 keyboard/screen-reader follow-up:
+- Fixed editable-field keyboard trap where Tab inserted a tab character instead of moving focus:
+- `src/ui/download/DownloadPanel.qml` `TextArea` now handles `Qt.Key_Tab` / `Qt.Key_Backtab` and explicitly moves focus via `nextItemInFocusChain`.
+- `src/ui/search/SearchPanel.qml` `TextField` now handles `Qt.Key_Tab` / `Qt.Key_Backtab` with explicit forward/backward focus movement.
+- Fixed combo value announcement delay:
+- `src/ui/shared/WEnumButton.qml` now updates `Accessible.name` with the current option and calls `Accessible.valueChanged()` when selection changes while focused, so screen readers get an immediate value-change event.
+- Added regression checks in `scripts/shared/accessibility_tests.py` for:
+- editable field Tab/Shift+Tab key handling snippets, and
+- combo value-change accessibility notification snippet (`Accessible.valueChanged()`).
+- Verification for this pass:
+- `scripts/windows/build.bat` succeeded and CTest passed (`ui_accessibility_checks`).
