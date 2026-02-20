@@ -136,6 +136,9 @@ def _run_feature_checks(repo_root: Path) -> list[str]:
                 "Accessible.name: \"About panel\"",
                 "Accessible.role: Accessible.List",
                 "Accessible.role: Accessible.ListItem",
+                "activeFocusOnTab: true",
+                "contributorsListScope.focusContributor(",
+                "Accessible.selected: isSelected",
                 "Accessible.role: Accessible.Link",
             ],
             "src/ui/about/UpdateCheckerDialog.qml": [
