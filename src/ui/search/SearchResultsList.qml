@@ -15,6 +15,16 @@ Item {
         }
         app.searchController.searchResultVM.setSelectedIndex(resultIndex);
     }
+    function preferredQuickAddFormat() {
+        return app.settings.preferredAudioQuality === 0 ? "MP3" : "BEST";
+    }
+    function addResultToDownloads(resultIndex) {
+        if (resultIndex < 0 || resultIndex >= resultRepeater.count) {
+            return;
+        }
+        selectResult(resultIndex);
+        app.searchController.albumInfoVM.requestDownload(preferredQuickAddFormat());
+    }
     function focusResult(resultIndex) {
         if (resultIndex < 0 || resultIndex >= resultRepeater.count) {
             return;
@@ -34,7 +44,13 @@ Item {
 
     Accessible.role: Accessible.List
     Accessible.name: "Search results"
-    Accessible.description: "Album search results. Use Up and Down arrows to move and Enter to select."
+    Accessible.description: "Album search results. Use Up and Down arrows to move and Enter to add the selected album using preferred quality."
+    activeFocusOnTab: true
+    onActiveFocusChanged: {
+        if (activeFocus && resultRepeater.count > 0) {
+            focusResult(selectedIndex >= 0 ? selectedIndex : 0);
+        }
+    }
 
     WScrollView {
         id: scrollView
@@ -65,22 +81,24 @@ Item {
                     x: isSelected ? 0 : (parent.width - width) / 2
                     scale: root.isSearching ? 0 : isSelected ? 0.95 : mouseArea.pressed ? 0.90 : 1.0
                     opacity: root.isSearching ? 0 : 1
-                    activeFocusOnTab: true
+                    activeFocusOnTab: false
                     border.width: activeFocus ? 2 : 0
                     border.color: activeFocus ? "#ffffff" : "transparent"
 
                     Accessible.role: Accessible.ListItem
                     Accessible.name: model.name
-                    Accessible.description: "Result " + (index + 1) + " of " + resultRepeater.count + ". " + (isSelected ? "Selected" : "Not selected")
+                    Accessible.description: "Result " + (index + 1) + " of " + resultRepeater.count + ". Press Enter to add using preferred quality. " + (isSelected ? "Selected" : "Not selected")
                     Accessible.focusable: true
                     Accessible.focused: activeFocus
+                    Accessible.selectable: true
+                    Accessible.selected: isSelected
 
                     Keys.onReturnPressed: {
-                        root.selectResult(index);
+                        root.addResultToDownloads(index);
                         event.accepted = true;
                     }
                     Keys.onEnterPressed: {
-                        root.selectResult(index);
+                        root.addResultToDownloads(index);
                         event.accepted = true;
                     }
                     Keys.onSpacePressed: {

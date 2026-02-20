@@ -53,8 +53,12 @@ def _run_feature_checks(repo_root: Path) -> list[str]:
             "src/ui/search/SearchResultsList.qml": [
                 "Accessible.role: Accessible.List",
                 "Accessible.role: Accessible.ListItem",
+                "Accessible.selected: isSelected",
+                "activeFocusOnTab: false",
                 "Keys.onUpPressed",
                 "Keys.onDownPressed",
+                "addResultToDownloads(",
+                "requestDownload(preferredQuickAddFormat())",
             ],
             "src/ui/search/AlbumInfoSide.qml": [
                 "Accessible.role: Accessible.Pane",
