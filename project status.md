@@ -60,6 +60,14 @@ Improve the Qt app so it follows screen-reader and keyboard accessibility best p
 - Updated `scripts/shared/accessibility_tests.py` to assert the corrected, Qt-valid accessibility patterns.
 - Verification for this pass:
 - `scripts/windows/build.bat` succeeded and CTest passed (`ui_accessibility_checks`).
+- 2026-02-19 announcement wording follow-up:
+- `WEnumButton` now keeps focused announcement format `Label: Value` while removing trailing `Current value` text from descriptions.
+- `WEnumButton` value-change announcements now use value-only semantics during the change event (`announceValueOnly` + `Accessible.valueChanged()`), then restore normal naming immediately.
+- `WNumberBox` now announces as `Label Value` (for example: `Download threads 1`) and no longer appends `Current value` to descriptions.
+- `WNumberBox` now emits `Accessible.valueChanged()` when numeric value changes while the spin box or its plus/minus buttons are focused.
+- Added test assertions for these semantics in `scripts/shared/accessibility_tests.py`.
+- Verification for this pass:
+- `scripts/windows/build.bat` succeeded and CTest passed (`ui_accessibility_checks`).
 - `scripts/windows/deploy.bat` succeeded.
 - `build/Release/appKhinsiderQT.exe` was launched successfully and remained running during a 4-second startup check.
 - 2026-02-19 keyboard/screen-reader follow-up:
