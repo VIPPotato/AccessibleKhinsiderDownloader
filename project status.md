@@ -92,3 +92,19 @@ Improve the Qt app so it follows screen-reader and keyboard accessibility best p
 - contributor list focus scope and selected-row semantics.
 - Verification for this pass:
 - `scripts/windows/build.bat` succeeded and CTest passed (`ui_accessibility_checks`).
+- 2026-02-19 checkbox multi-select follow-up:
+- Search results now support checkbox-style selection via keyboard and screen reader semantics:
+- Space/Enter toggles checked state per result.
+- List items expose both selection and check state (`Accessible.selectable`/`Accessible.selected` and `Accessible.checkable`/`Accessible.checked`) so announcements remain explicit.
+- Search list keeps arrow-key browsing model with no per-item tab stops, and adds shortcuts:
+- `Ctrl+D` queues checked (or currently selected) albums directly to downloads.
+- `Ctrl+U` appends checked (or currently selected) album URLs to the download tab input buffer.
+- Search panel now includes action buttons near the list:
+- `Add Checked` and `To URL Box`.
+- Download URL input now syncs through a shared buffer (`DownloaderModel.bulkUrlBuffer`) so URLs appended from Search appear in the Download tab text area without breaking existing import behavior.
+- Search model now exposes `albumLink` as a QML role to support selected-link actions.
+- Verification for this pass:
+- `scripts/windows/build.bat` succeeded and CTest passed (`ui_accessibility_checks`).
+
+## TODO
+- Evaluate search result filtering by category/platform (for example console/system) once parser/model coverage is confirmed reliable across search results and not just full album metadata.
