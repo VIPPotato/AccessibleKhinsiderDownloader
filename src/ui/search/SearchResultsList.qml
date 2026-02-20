@@ -4,9 +4,13 @@ import "../shared"
 
 Item {
     id: root
+    property var checkedResults: ({})
+    property int checkedCount: 0
+    property int checkedRevision: 0
     function hideAllResults()
     {
         root.isSearching = true;
+        root.clearCheckedResults();
         app.searchController.searchResultVM.setSelectedIndex(-1);
     }
     function selectResult(resultIndex) {
@@ -15,15 +19,69 @@ Item {
         }
         app.searchController.searchResultVM.setSelectedIndex(resultIndex);
     }
-    function preferredQuickAddFormat() {
-        return app.settings.preferredAudioQuality === 0 ? "MP3" : "BEST";
+    function isResultChecked(resultIndex) {
+        return checkedResults[resultIndex] === true;
     }
-    function addResultToDownloads(resultIndex) {
+    function setResultChecked(resultIndex, checked) {
         if (resultIndex < 0 || resultIndex >= resultRepeater.count) {
             return;
         }
-        selectResult(resultIndex);
-        app.searchController.albumInfoVM.requestDownload(preferredQuickAddFormat());
+        var previouslyChecked = root.isResultChecked(resultIndex);
+        if (previouslyChecked === checked) {
+            return;
+        }
+        if (checked) {
+            checkedResults[resultIndex] = true;
+            checkedCount++;
+        } else {
+            delete checkedResults[resultIndex];
+            checkedCount = Math.max(0, checkedCount - 1);
+        }
+        checkedRevision++;
+    }
+    function toggleResultChecked(resultIndex) {
+        setResultChecked(resultIndex, !isResultChecked(resultIndex));
+    }
+    function clearCheckedResults() {
+        checkedResults = ({});
+        checkedCount = 0;
+        checkedRevision++;
+    }
+    function checkedAlbumLinks() {
+        var links = [];
+        for (var i = 0; i < resultRepeater.count; i++) {
+            if (!isResultChecked(i)) {
+                continue;
+            }
+            var item = resultRepeater.itemAt(i);
+            if (item && item.albumLink && item.albumLink.length > 0) {
+                links.push(item.albumLink);
+            }
+        }
+        if (links.length === 0 && selectedIndex >= 0) {
+            var selectedItem = resultRepeater.itemAt(selectedIndex);
+            if (selectedItem && selectedItem.albumLink && selectedItem.albumLink.length > 0) {
+                links.push(selectedItem.albumLink);
+            }
+        }
+        return links;
+    }
+    function checkedAlbumLinksText() {
+        return checkedAlbumLinks().join("\n");
+    }
+    function addCheckedToDownloads() {
+        var linksText = checkedAlbumLinksText();
+        if (linksText.length === 0) {
+            return;
+        }
+        app.downloaderController.downloaderVM.addToDownloadList(linksText);
+    }
+    function appendCheckedUrlsToDownloadInput() {
+        var linksText = checkedAlbumLinksText();
+        if (linksText.length === 0) {
+            return;
+        }
+        app.downloaderController.downloaderVM.appendBulkUrlBuffer(linksText);
     }
     function focusResult(resultIndex) {
         if (resultIndex < 0 || resultIndex >= resultRepeater.count) {
@@ -44,7 +102,7 @@ Item {
 
     Accessible.role: Accessible.List
     Accessible.name: "Search results"
-    Accessible.description: "Album search results. Use Up and Down arrows to move and Enter to add the selected album using preferred quality."
+    Accessible.description: "Album search results. Use Up and Down arrows to move, Space to check albums, Ctrl+D to queue checked albums, and Ctrl+U to append checked URLs to download input."
     activeFocusOnTab: true
     onActiveFocusChanged: {
         if (activeFocus && resultRepeater.count > 0) {
@@ -73,8 +131,10 @@ Item {
 
                     property bool isHovered: false
                     property bool isSelected: index === root.selectedIndex
+                    property bool isChecked: root.checkedRevision >= 0 && root.isResultChecked(index)
+                    property string albumLink: model.albumLink
 
-                    color: isSelected || isHovered ? "#759fc7" : "#6c98c4"
+                    color: isSelected || isHovered ? "#759fc7" : (isChecked ? "#688db2" : "#6c98c4")
                     height: 45
                     radius: 10
                     width: parent.width * 0.9
@@ -87,22 +147,24 @@ Item {
 
                     Accessible.role: Accessible.ListItem
                     Accessible.name: model.name
-                    Accessible.description: "Result " + (index + 1) + " of " + resultRepeater.count + ". Press Enter to add using preferred quality. " + (isSelected ? "Selected" : "Not selected")
+                    Accessible.description: "Result " + (index + 1) + " of " + resultRepeater.count + ". " + (isSelected ? "Selected" : "Not selected") + ". " + (isChecked ? "Checked" : "Not checked") + "."
                     Accessible.focusable: true
                     Accessible.focused: activeFocus
                     Accessible.selectable: true
                     Accessible.selected: isSelected
+                    Accessible.checkable: true
+                    Accessible.checked: isChecked
 
                     Keys.onReturnPressed: {
-                        root.addResultToDownloads(index);
+                        root.toggleResultChecked(index);
                         event.accepted = true;
                     }
                     Keys.onEnterPressed: {
-                        root.addResultToDownloads(index);
+                        root.toggleResultChecked(index);
                         event.accepted = true;
                     }
                     Keys.onSpacePressed: {
-                        root.selectResult(index);
+                        root.toggleResultChecked(index);
                         event.accepted = true;
                     }
                     Keys.onUpPressed: {
@@ -114,7 +176,13 @@ Item {
                         event.accepted = true;
                     }
                     Keys.onPressed: (event) => {
-                        if (event.key === Qt.Key_Home) {
+                        if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_D) {
+                            root.addCheckedToDownloads();
+                            event.accepted = true;
+                        } else if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_U) {
+                            root.appendCheckedUrlsToDownloadInput();
+                            event.accepted = true;
+                        } else if (event.key === Qt.Key_Home) {
                             root.focusResult(0);
                             event.accepted = true;
                         } else if (event.key === Qt.Key_End) {
@@ -164,8 +232,22 @@ Item {
                         }
                     }
                     Text {
+                        id: checkboxIndicator
                         anchors.left: parent.left
                         anchors.leftMargin: 10
+                        color: "white"
+                        font.bold: true
+                        font.pointSize: 13
+                        height: parent.height
+                        horizontalAlignment: Text.AlignLeft
+                        text: isChecked ? "[x]" : "[ ]"
+                        verticalAlignment: Text.AlignVCenter
+                        width: 28
+                        Accessible.ignored: true
+                    }
+                    Text {
+                        anchors.left: parent.left
+                        anchors.leftMargin: 40
                         anchors.right: parent.right
                         anchors.rightMargin: 10
                         color: "white"
@@ -190,12 +272,12 @@ Item {
        }
 
        Connections {
-           target: app.searchController.searchResultVM
-           function onSearchCompleted() {
-               root.isSearching = false;
-               if (resultRepeater.count > 0) {
-                   root.focusResult(0);
-               }
-           }
-       }
+            target: app.searchController.searchResultVM
+            function onSearchCompleted() {
+                root.isSearching = false;
+                if (resultRepeater.count > 0) {
+                    root.focusResult(0);
+                }
+            }
+        }
 }

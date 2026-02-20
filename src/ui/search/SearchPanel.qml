@@ -14,6 +14,22 @@ Rectangle {
     function triggerSearch() {
         app.searchController.doSearch(textfield.text);
     }
+    function addCheckedSearchResultsToDownloads() {
+        searchList.addCheckedToDownloads();
+    }
+    function appendCheckedSearchUrlsToDownloadInput() {
+        searchList.appendCheckedUrlsToDownloadInput();
+    }
+
+    Keys.onPressed: (event) => {
+        if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_D) {
+            addCheckedSearchResultsToDownloads();
+            event.accepted = true;
+        } else if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_U) {
+            appendCheckedSearchUrlsToDownloadInput();
+            event.accepted = true;
+        }
+    }
 
     Connections
     {
@@ -287,6 +303,34 @@ Rectangle {
                 height: 1
                 width: parent.width
             }
+            Row {
+                id: selectionActions
+                width: parent.width * 0.9
+                height: 36
+                spacing: 10
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                WButton {
+                    width: (parent.width - parent.spacing) * 0.5
+                    height: parent.height
+                    label: "Add Checked"
+                    accessibleName: "Add checked albums to downloads"
+                    accessibleDescription: "Queue checked search results for download. Shortcut: Ctrl+D."
+                    onClicked: {
+                        mainWindow.addCheckedSearchResultsToDownloads();
+                    }
+                }
+                WButton {
+                    width: (parent.width - parent.spacing) * 0.5
+                    height: parent.height
+                    label: "To URL Box"
+                    accessibleName: "Append checked album URLs to download input"
+                    accessibleDescription: "Append checked album links to the download tab URL input box. Shortcut: Ctrl+U."
+                    onClicked: {
+                        mainWindow.appendCheckedSearchUrlsToDownloadInput();
+                    }
+                }
+            }
             //WButton {
             //    y: 0
             //    width: 140
@@ -303,7 +347,7 @@ Rectangle {
             //Search Info
             SearchResultsList {
                 id: searchList;
-                height: parent.height - rectangle.height - 30
+                height: parent.height - rectangle.height - selectionActions.height - 40
                 width: parent.width
             }
         }

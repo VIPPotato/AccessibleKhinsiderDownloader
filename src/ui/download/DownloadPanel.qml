@@ -12,7 +12,7 @@ Item {
     Accessible.description: "Import album URLs and control the download queue."
     function importBulkUrls() {
         app.downloaderController.downloaderVM.addToDownloadList(textfield.text);
-        textfield.text = "";
+        app.downloaderController.downloaderVM.bulkUrlBuffer = "";
     }
     function cancelAllDownloads() {
         app.downloaderController.downloaderVM.cancelAllDownloads();
@@ -76,6 +76,7 @@ Item {
                                 {
                                     hoverEnabled: true
                                     id: textfield
+                                    text: app.downloaderController.downloaderVM.bulkUrlBuffer
                                     height: parent.height
                                     color: "#ffffff"
                                     font.pointSize: 13
@@ -90,6 +91,12 @@ Item {
                                     Accessible.description: "Paste one URL per line and press Import."
                                     Accessible.focusable: true
                                     Accessible.focused: activeFocus
+
+                                    onTextChanged: {
+                                        if (app.downloaderController.downloaderVM.bulkUrlBuffer !== text) {
+                                            app.downloaderController.downloaderVM.bulkUrlBuffer = text;
+                                        }
+                                    }
 
                                     function focusNextEditableTarget(forward) {
                                         var nextItem = textfield.nextItemInFocusChain(forward);
