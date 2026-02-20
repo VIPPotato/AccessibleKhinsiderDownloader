@@ -109,6 +109,7 @@ def _run_feature_checks(repo_root: Path) -> list[str]:
             "src/ui/shared/WEnumButton.qml": [
                 "Accessible.role: Accessible.ComboBox",
                 "Accessible.valueChanged()",
+                "Accessible.name: announceValueOnly ? buttonlabel.text : (accessibleName + \": \" + buttonlabel.text)",
                 "Keys.onUpPressed",
                 "Keys.onDownPressed",
                 "Keys.onLeftPressed",
@@ -116,6 +117,8 @@ def _run_feature_checks(repo_root: Path) -> list[str]:
             ],
             "src/ui/shared/WNumberBox.qml": [
                 "Accessible.role: Accessible.SpinBox",
+                "Accessible.valueChanged()",
+                "Accessible.name: accessibleName + \" \" + currentNumber",
                 "Keys.onUpPressed",
                 "Keys.onDownPressed",
                 "Keys.onPressed",

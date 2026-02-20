@@ -6,6 +6,7 @@ Rectangle {
     property alias model: internalModel
     property string accessibleName: "Option selector"
     property string accessibleDescription: ""
+    property bool announceValueOnly: false
 
     function resetModel(newItems, newIndex) {
         internalModel.clear();
@@ -46,7 +47,9 @@ Rectangle {
     onSelectedIndexChanged: {
         updateLabelText();
         if (activeFocus) {
+            announceValueOnly = true;
             Accessible.valueChanged();
+            resetAnnouncementNameTimer.restart();
         }
     }
 
@@ -69,13 +72,21 @@ Rectangle {
     activeFocusOnTab: true
 
     Accessible.role: Accessible.ComboBox
-    Accessible.name: accessibleName + ": " + buttonlabel.text
-    Accessible.description: (accessibleDescription.length > 0
-                             ? accessibleDescription
-                             : "Use Enter, Space, or arrow keys to change option.")
-                            + " Current value: " + buttonlabel.text
+    Accessible.name: announceValueOnly ? buttonlabel.text : (accessibleName + ": " + buttonlabel.text)
+    Accessible.description: accessibleDescription.length > 0
+                            ? accessibleDescription
+                            : "Use Enter, Space, or arrow keys to change option."
     Accessible.focusable: enabled
     Accessible.focused: activeFocus
+
+    Timer {
+        id: resetAnnouncementNameTimer
+        interval: 0
+        repeat: false
+        onTriggered: {
+            buttonRect.announceValueOnly = false;
+        }
+    }
 
     Behavior on color {
         ColorAnimation {
@@ -171,5 +182,10 @@ Rectangle {
 
     Component.onCompleted: {
         updateLabelText();
+    }
+    onActiveFocusChanged: {
+        if (!activeFocus) {
+            announceValueOnly = false;
+        }
     }
 }

@@ -19,11 +19,10 @@ Rectangle {
     activeFocusOnTab: true
 
     Accessible.role: Accessible.SpinBox
-    Accessible.name: accessibleName
-    Accessible.description: (accessibleDescription.length > 0
-                             ? accessibleDescription
-                             : "Range from " + minNumber + " to " + maxNumber + ". Use arrow keys, Home, End, Page Up, or Page Down.")
-                            + " Current value: " + currentNumber
+    Accessible.name: accessibleName + " " + currentNumber
+    Accessible.description: accessibleDescription.length > 0
+                            ? accessibleDescription
+                            : "Range from " + minNumber + " to " + maxNumber + ". Use arrow keys, Home, End, Page Up, or Page Down."
     Accessible.focusable: enabled
     Accessible.focused: activeFocus
 
@@ -48,6 +47,9 @@ Rectangle {
     onCurrentNumberChanged: {
         if (nextNumber !== currentNumber) {
             nextNumber = currentNumber;
+        }
+        if (activeFocus || plus.activeFocus || minus.activeFocus) {
+            Accessible.valueChanged();
         }
     }
 
@@ -120,6 +122,7 @@ Rectangle {
         anchors.bottomMargin: 5
         WNumberBoxButton
         {
+            id: plus
             y:-4
             height: parent.height
             isPlus: true
