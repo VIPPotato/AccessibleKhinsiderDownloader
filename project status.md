@@ -81,3 +81,14 @@ Improve the Qt app so it follows screen-reader and keyboard accessibility best p
 - combo value-change accessibility notification snippet (`Accessible.valueChanged()`).
 - Verification for this pass:
 - `scripts/windows/build.bat` succeeded and CTest passed (`ui_accessibility_checks`).
+- 2026-02-19 search/about navigation follow-up:
+- Search results list now exposes explicit selected semantics (`Accessible.selectable`/`Accessible.selected`) so screen readers can distinguish selected vs not selected entries.
+- Search results are no longer tab-stopped per row (`activeFocusOnTab: false` on list items). Keyboard browsing inside the list is arrow-key driven.
+- Enter on a focused search result now triggers quick add to downloads using preferred audio quality (`app.settings.preferredAudioQuality`) while preserving the existing visual layout.
+- About contributors section now has a focusable list scope (`activeFocusOnTab: true`) and supports Up/Down/Home/End traversal across contributor rows.
+- Contributor rows now expose selected state and can be focused/read with arrow keys, while the website link remains separately focusable.
+- Added regression checks in `scripts/shared/accessibility_tests.py` for:
+- search result selected-state semantics and quick-add hook snippets,
+- contributor list focus scope and selected-row semantics.
+- Verification for this pass:
+- `scripts/windows/build.bat` succeeded and CTest passed (`ui_accessibility_checks`).
