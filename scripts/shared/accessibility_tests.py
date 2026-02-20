@@ -56,10 +56,11 @@ def _run_feature_checks(repo_root: Path) -> list[str]:
             ],
             "src/ui/search/SearchResultsList.qml": [
                 "Accessible.role: Accessible.List",
-                "Accessible.role: Accessible.ListItem",
+                "Accessible.role: Accessible.CheckBox",
                 "Accessible.selected: isSelected",
                 "Accessible.checkable: true",
                 "Accessible.checked: isChecked",
+                "Accessible.valueChanged()",
                 "activeFocusOnTab: false",
                 "Keys.onUpPressed",
                 "Keys.onDownPressed",

@@ -145,7 +145,7 @@ Item {
                     border.width: activeFocus ? 2 : 0
                     border.color: activeFocus ? "#ffffff" : "transparent"
 
-                    Accessible.role: Accessible.ListItem
+                    Accessible.role: Accessible.CheckBox
                     Accessible.name: model.name
                     Accessible.description: "Result " + (index + 1) + " of " + resultRepeater.count + ". " + (isSelected ? "Selected" : "Not selected") + ". " + (isChecked ? "Checked" : "Not checked") + "."
                     Accessible.focusable: true
@@ -154,6 +154,11 @@ Item {
                     Accessible.selected: isSelected
                     Accessible.checkable: true
                     Accessible.checked: isChecked
+                    onIsCheckedChanged: {
+                        if (activeFocus) {
+                            Accessible.valueChanged();
+                        }
+                    }
 
                     Keys.onReturnPressed: {
                         root.toggleResultChecked(index);
