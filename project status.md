@@ -108,3 +108,7 @@ Improve the Qt app so it follows screen-reader and keyboard accessibility best p
 
 ## TODO
 - Evaluate search result filtering by category/platform (for example console/system) once parser/model coverage is confirmed reliable across search results and not just full album metadata.
+- 2026-02-19 checkbox announcement follow-up:
+- Search result rows now expose `Accessible.CheckBox` role and emit `Accessible.valueChanged()` on checked-state transitions while focused, so pressing Space announces checked/unchecked immediately.
+- Verification for this pass:
+- `scripts/windows/build.bat` succeeded and CTest passed (`ui_accessibility_checks`).
