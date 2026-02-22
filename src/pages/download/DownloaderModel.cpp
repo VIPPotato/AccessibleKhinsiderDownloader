@@ -1,6 +1,7 @@
 #include "DownloaderModel.h"
 #include "parser/KhinsiderParser.h"
 #include "parser/Album.h"
+#include <QSet>
 
 DownloaderModel::DownloaderModel(QObject *parent) : QAbstractListModel(parent) {
 }
@@ -133,4 +134,31 @@ void DownloaderModel::insertAlbum(Album *album) {
         }
     });
     endInsertRows();
+}
+
+void DownloaderModel::setBulkUrlBuffer(const QString &buffer) {
+    if (m_bulkUrlBuffer == buffer) {
+        return;
+    }
+    m_bulkUrlBuffer = buffer;
+    emit bulkUrlBufferChanged();
+}
+
+void DownloaderModel::appendBulkUrlBuffer(const QString &urls) {
+    QStringList merged = m_bulkUrlBuffer.split('\n', Qt::SkipEmptyParts);
+    QSet<QString> seen;
+    for (const QString &line : merged) {
+        seen.insert(line.trimmed());
+    }
+
+    for (const QString &line : urls.split('\n', Qt::SkipEmptyParts)) {
+        const QString trimmed = line.trimmed();
+        if (trimmed.isEmpty() || seen.contains(trimmed)) {
+            continue;
+        }
+        merged.append(trimmed);
+        seen.insert(trimmed);
+    }
+
+    setBulkUrlBuffer(merged.join('\n'));
 }

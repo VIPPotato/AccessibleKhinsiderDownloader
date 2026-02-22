@@ -6,6 +6,7 @@
 
 class DownloaderModel : public QAbstractListModel {
     Q_OBJECT
+    Q_PROPERTY(QString bulkUrlBuffer READ bulkUrlBuffer WRITE setBulkUrlBuffer NOTIFY bulkUrlBufferChanged)
 
 public:
     enum Roles {
@@ -40,6 +41,8 @@ public:
     Q_INVOKABLE int totalDownloadedSongs() const;
 
     Q_INVOKABLE int totalSongs() const;
+    Q_INVOKABLE void appendBulkUrlBuffer(const QString &urls);
+    QString bulkUrlBuffer() const { return m_bulkUrlBuffer; }
 
 public slots:
     void cancelAllDownloads();
@@ -51,6 +54,7 @@ public slots:
     void setAlbums(const QVector<Album *> &albums);
 
     void insertAlbum(Album *album);
+    void setBulkUrlBuffer(const QString &buffer);
 
 signals:
     void albumCancelRequested(Album *album);
@@ -60,9 +64,11 @@ signals:
     void totalsChanged();
 
     void addToDownloadList(const QString &List);
+    void bulkUrlBufferChanged();
 
 private:
     QVector<Album *> m_albums;
+    QString m_bulkUrlBuffer;
 };
 
 #endif // DOWNLOADERMODEL_H

@@ -5,13 +5,86 @@ Rectangle {
     property int minNumber : 0
     property int currentNumber : 0
     property int nextNumber : 0
+    property string accessibleName: "Number selector"
+    property string accessibleDescription: ""
     signal valueChanged();
     id: buttonRect
     width: parent.width * 0.5
     radius: 107
     height: 40
-    color: "#6c98c4"
+    color: mouseArea.containsMouse || activeFocus ? "#5a87b3" : "#6c98c4"
     scale: 1.0
+    border.width: activeFocus ? 2 : 0
+    border.color: activeFocus ? "#ffffff" : "transparent"
+    activeFocusOnTab: true
+
+    Accessible.role: Accessible.SpinBox
+    Accessible.name: accessibleName + " " + currentNumber
+    Accessible.description: accessibleDescription.length > 0
+                            ? accessibleDescription
+                            : "Range from " + minNumber + " to " + maxNumber + ". Use arrow keys, Home, End, Page Up, or Page Down."
+    Accessible.focusable: enabled
+    Accessible.focused: activeFocus
+
+    function commitNextValue(newValue) {
+        nextNumber = Math.max(minNumber, Math.min(maxNumber, newValue));
+        if (nextNumber !== currentNumber) {
+            fadeOut.start();
+        }
+    }
+    function increaseValue() {
+        if (!enabled) {
+            return;
+        }
+        commitNextValue(nextNumber + 1);
+    }
+    function decreaseValue() {
+        if (!enabled) {
+            return;
+        }
+        commitNextValue(nextNumber - 1);
+    }
+    onCurrentNumberChanged: {
+        if (nextNumber !== currentNumber) {
+            nextNumber = currentNumber;
+        }
+        if (activeFocus || plus.activeFocus || minus.activeFocus) {
+            Accessible.valueChanged();
+        }
+    }
+
+    Keys.onUpPressed: {
+        increaseValue();
+        event.accepted = true;
+    }
+    Keys.onRightPressed: {
+        increaseValue();
+        event.accepted = true;
+    }
+    Keys.onDownPressed: {
+        decreaseValue();
+        event.accepted = true;
+    }
+    Keys.onLeftPressed: {
+        decreaseValue();
+        event.accepted = true;
+    }
+    Keys.onPressed: (event) => {
+        if (event.key === Qt.Key_Home) {
+            commitNextValue(minNumber);
+            event.accepted = true;
+        } else if (event.key === Qt.Key_End) {
+            commitNextValue(maxNumber);
+            event.accepted = true;
+        } else if (event.key === Qt.Key_PageUp) {
+            commitNextValue(nextNumber + 10);
+            event.accepted = true;
+        } else if (event.key === Qt.Key_PageDown) {
+            commitNextValue(nextNumber - 10);
+            event.accepted = true;
+        }
+    }
+
     Behavior on color {
         ColorAnimation {
             duration: 150
@@ -34,10 +107,11 @@ Rectangle {
     }
 
     MouseArea {
+        id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
-        onEntered: buttonRect.color = "#5a87b3"
-        onExited: buttonRect.color = "#6c98c4"
+        enabled: buttonRect.enabled
+        cursorShape: Qt.PointingHandCursor
     }
     Row
     {
@@ -48,16 +122,13 @@ Rectangle {
         anchors.bottomMargin: 5
         WNumberBoxButton
         {
+            id: plus
             y:-4
             height: parent.height
             isPlus: true
             width: parent.width * 0.2
             onInvoked: {
-                nextNumber = Math.min(maxNumber, nextNumber + 1)
-                if(nextNumber!= currentNumber)
-                {
-                    fadeOut.start();
-                }
+                buttonRect.increaseValue();
             }
 
         }
@@ -72,6 +143,7 @@ Rectangle {
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             font.pointSize: 16
+            Accessible.ignored: true
         }
         WNumberBoxButton
         {
@@ -81,11 +153,7 @@ Rectangle {
             height: parent.height
             width: parent.width * 0.2
             onInvoked: {
-                nextNumber = Math.max(minNumber, nextNumber - 1)
-                if(nextNumber!= currentNumber)
-                {
-                    fadeOut.start();
-                }
+                buttonRect.decreaseValue();
             }
         }
     }

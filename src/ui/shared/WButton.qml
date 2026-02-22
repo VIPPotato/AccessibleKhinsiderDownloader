@@ -7,11 +7,22 @@ Rectangle {
     property alias label: buttonlabel.text
 
     property alias fontSize : buttonlabel.font.pointSize
-    color: "#6c98c4"
+    property string accessibleName: buttonlabel.text
+    property string accessibleDescription: ""
+    color: mouseArea.containsMouse || activeFocus ? "#5a87b3" : "#6c98c4"
     height: 40
     //width: parent.width * 0.5
     radius: 107
     scale: 1.0
+    border.width: activeFocus ? 2 : 0
+    border.color: activeFocus ? "#ffffff" : "transparent"
+    activeFocusOnTab: true
+
+    Accessible.role: Accessible.Button
+    Accessible.name: accessibleName
+    Accessible.description: accessibleDescription
+    Accessible.focusable: enabled
+    Accessible.focused: activeFocus
 
     Behavior on color {
         ColorAnimation {
@@ -39,12 +50,35 @@ Rectangle {
             to: 1.0
         }
     }
+    function activateButton() {
+        if (!enabled) {
+            return;
+        }
+        shrinkAnim.restart();
+        growAnim.restart();
+        buttonRect.clicked();
+    }
+
+    Keys.onReturnPressed: {
+        activateButton();
+        event.accepted = true;
+    }
+    Keys.onEnterPressed: {
+        activateButton();
+        event.accepted = true;
+    }
+    Keys.onSpacePressed: {
+        activateButton();
+        event.accepted = true;
+    }
+
     MouseArea {
+        id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
+        enabled: buttonRect.enabled
+        cursorShape: Qt.PointingHandCursor
 
-        onEntered: buttonRect.color = "#5a87b3"
-        onExited: buttonRect.color = "#6c98c4"
         onPressed: {
             shrinkAnim.running = true;
         }
@@ -53,7 +87,7 @@ Rectangle {
         }
         onClicked:
         {
-            buttonRect.clicked();
+            buttonRect.activateButton();
         }
     }
     Text {
@@ -69,5 +103,6 @@ Rectangle {
         horizontalAlignment: Text.AlignHCenter
         text: "Add FLAC"
         verticalAlignment: Text.AlignVCenter
+        Accessible.ignored: true
     }
 }

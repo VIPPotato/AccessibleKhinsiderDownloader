@@ -11,6 +11,7 @@ class SearchResultModel : public QAbstractListModel {
 public:
     enum Roles {
         NameRole = Qt::UserRole + 1,
+        AlbumLinkRole,
     };
 
     explicit SearchResultModel(QObject *parent = nullptr)
@@ -36,6 +37,8 @@ public:
         switch (role) {
             case NameRole:
                 return album->name();
+            case AlbumLinkRole:
+                return album->albumLink();
         }
 
         return QVariant();
@@ -44,6 +47,7 @@ public:
     QHash<int, QByteArray> roleNames() const override {
         QHash<int, QByteArray> roles;
         roles[NameRole] = "name";
+        roles[AlbumLinkRole] = "albumLink";
         return roles;
     }
 

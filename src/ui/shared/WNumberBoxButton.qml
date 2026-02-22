@@ -27,6 +27,7 @@ Text
     }
     property bool isPlus: false
     id: control
+    Accessible.ignored: true
 
     color:"white"
     text: isPlus ? "+" : "-"
@@ -37,6 +38,7 @@ Text
     {
         anchors.fill: parent
         hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
         onEntered: {
 
             onHover.start()

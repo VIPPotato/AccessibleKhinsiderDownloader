@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Controls
-import Qt5Compat.GraphicalEffects
 import QtQuick.Layouts
 
 ColumnLayout{
@@ -10,6 +9,27 @@ ColumnLayout{
     property int imageIndex: 0
     property int imageTarget : 0
     property var imageSources: app.searchController.albumInfoVM.albumImages
+    activeFocusOnTab: true
+
+    Accessible.role: Accessible.Pane
+    Accessible.name: "Album artwork viewer"
+    Accessible.description: "Use previous and next image buttons to switch artwork."
+
+    Keys.onLeftPressed: {
+        if (col.imageSources.length > 1) {
+            col.imageTarget--;
+            fadeOut.start();
+        }
+        event.accepted = true;
+    }
+    Keys.onRightPressed: {
+        if (col.imageSources.length > 1) {
+            col.imageTarget++;
+            fadeOut.start();
+        }
+        event.accepted = true;
+    }
+
     Connections {
         target: app.searchController.albumInfoVM
         function onCurrentAlbumChanged()
@@ -25,7 +45,6 @@ ColumnLayout{
             {
                 blur.radius = 30;
             }
-            blur.source = profileImage;
         }
     }
     Item {
@@ -43,6 +62,12 @@ ColumnLayout{
                 NumberAnimation { target: profileImage; property: "opacity"; to: 0; duration: 100 }
                 onStopped:
                 {
+                    if (col.imageSources.length === 0) {
+                        col.imageIndex = 0;
+                        col.imageTarget = 0;
+                        fadeIn.start();
+                        return;
+                    }
                     //wrap imageTarget
                     if(imageTarget < 0)
                     {
@@ -61,47 +86,23 @@ ColumnLayout{
             anchors.rightMargin: 10
             anchors.topMargin: 10
             anchors.bottomMargin: 10
-            source: col.imageSources[col.imageIndex]
+            source: col.imageSources.length > 0 ? col.imageSources[col.imageIndex] : "qrc:/icons/albumplaceholder.jpg"
             //source: "icons/albumplaceholder.jpg"
             fillMode: Image.PreserveAspectFit
-            layer.enabled: true
-            layer.effect: OpacityMask{
-                maskSource: Item{
-                    width: profileImage.width
-                    height: profileImage.height
-                    Rectangle{
-                        anchors.centerIn: parent
-                        width: Math.min(profileImage.width, profileImage.height)
-                        height: width
-                        radius: 10
-                    }
-                }
-            }
+            Accessible.ignored: true
 
         }
-        FastBlur {
+        Rectangle {
             id: blur
-            cached:false
             anchors.fill: profileImage
-            source: profileImage
+            color: "#8c2c3e50"
             radius: 30
+            visible: radius > 0
+            opacity: visible ? 1 : 0
             Behavior on radius {
                 NumberAnimation {
                     duration: 100
                     easing.type: Easing.InOutQuad
-                }
-            }
-            layer.enabled: true
-            layer.effect: OpacityMask{
-                maskSource: Item{
-                    width: profileImage.width
-                    height: profileImage.height
-                    Rectangle{
-                        anchors.centerIn: parent
-                        width: Math.min(profileImage.width, profileImage.height)
-                        height: width
-                        radius: 10
-                    }
                 }
             }
         }
@@ -113,11 +114,9 @@ ColumnLayout{
                     return false;
                 return !app.searchController.albumInfoVM.currentAlbum.isInfoParsed || profileImage.progress !== 1;
             }
-            layer.enabled: true
-            layer.effect:ColorOverlay{
-                antialiasing: true
-                color: "#ce60f7ff"
-            }
+            Accessible.role: Accessible.StaticText
+            Accessible.name: running ? "Loading album artwork" : "Album artwork loaded"
+            Accessible.ignored: !visible
         }
     }
 
@@ -136,6 +135,8 @@ ColumnLayout{
                 width: parent.width*0.2
                 height: parent.height
                 mirror: false
+                accessibleName: "Previous album image"
+                accessibleDescription: "Show the previous artwork image."
                 onRequestImageChange:
                 {
                     if(col.imageSources.length > 1)
@@ -159,12 +160,16 @@ ColumnLayout{
                 width: parent.width*0.6
                 height: parent.height
                 color: "#ffffff"
+
+                Accessible.role: Accessible.StaticText
+                Accessible.name: "Artwork index"
+                Accessible.description: text
                 SequentialAnimation {
                     id: fadeTextOut
                     NumberAnimation { target: indextextlabel; property: "opacity"; to: 0; duration: 50 }
                     onStopped: {
                         // Update the text after the fade-out
-                        indextextlabel._text = (col.imageIndex + 1) + "/" + col.imageSources.length
+                        indextextlabel._text = col.imageSources.length > 0 ? (col.imageIndex + 1) + "/" + col.imageSources.length : "0/0"
                         fadeTextIn.start()  // Start the fade-in animation
                     }
                 }
@@ -199,6 +204,8 @@ ColumnLayout{
             {
                 width: parent.width*0.2
                 height: parent.height
+                accessibleName: "Next album image"
+                accessibleDescription: "Show the next artwork image."
                 onRequestImageChange:
                 {
                     if(col.imageSources.length > 1)

@@ -7,6 +7,16 @@ Item {
     //todo: show speed per album, MB/MB stop button (delete)
     width: 800
     height: 600
+    Accessible.role: Accessible.Pane
+    Accessible.name: "Download panel"
+    Accessible.description: "Import album URLs and control the download queue."
+    function importBulkUrls() {
+        app.downloaderController.downloaderVM.addToDownloadList(textfield.text);
+        app.downloaderController.downloaderVM.bulkUrlBuffer = "";
+    }
+    function cancelAllDownloads() {
+        app.downloaderController.downloaderVM.cancelAllDownloads();
+    }
     Rectangle {
         id:mainWindow
         state: "normal"
@@ -66,6 +76,7 @@ Item {
                                 {
                                     hoverEnabled: true
                                     id: textfield
+                                    text: app.downloaderController.downloaderVM.bulkUrlBuffer
                                     height: parent.height
                                     color: "#ffffff"
                                     font.pointSize: 13
@@ -73,6 +84,39 @@ Item {
                                     placeholderText: "URLs here"
                                     width: parent.width
                                     background:null
+                                    activeFocusOnTab: true
+
+                                    Accessible.role: Accessible.EditableText
+                                    Accessible.name: "Album URLs input"
+                                    Accessible.description: "Paste one URL per line and press Import."
+                                    Accessible.focusable: true
+                                    Accessible.focused: activeFocus
+
+                                    onTextChanged: {
+                                        if (app.downloaderController.downloaderVM.bulkUrlBuffer !== text) {
+                                            app.downloaderController.downloaderVM.bulkUrlBuffer = text;
+                                        }
+                                    }
+
+                                    function focusNextEditableTarget(forward) {
+                                        var nextItem = textfield.nextItemInFocusChain(forward);
+                                        if (nextItem && nextItem !== textfield) {
+                                            nextItem.forceActiveFocus();
+                                        }
+                                    }
+
+                                    Keys.onPressed: (event) => {
+                                        if (event.key === Qt.Key_Backtab || (event.key === Qt.Key_Tab && (event.modifiers & Qt.ShiftModifier))) {
+                                            textfield.focusNextEditableTarget(false);
+                                            event.accepted = true;
+                                        } else if (event.key === Qt.Key_Tab && event.modifiers === Qt.NoModifier) {
+                                            textfield.focusNextEditableTarget(true);
+                                            event.accepted = true;
+                                        } else if ((event.modifiers & Qt.ControlModifier) && (event.key === Qt.Key_Return || event.key === Qt.Key_Enter)) {
+                                            root.importBulkUrls();
+                                            event.accepted = true;
+                                        }
+                                    }
 
                                     PropertyAnimation {
                                         id: onPlaceholderHover
@@ -115,10 +159,11 @@ Item {
 
                         Layout.preferredWidth: parent.width * 0.8
                         label: "Import"
+                        accessibleName: "Import URLs into download queue"
+                        accessibleDescription: "Import the URLs entered above into the download queue."
                         onClicked:
                         {
-                            app.downloaderController.downloaderVM.addToDownloadList(textfield.text);
-                            textfield.text = "";
+                            root.importBulkUrls();
                             //mainWindow.state = (mainWindow.state === "normal") ? "expanded" : "normal"
                         }
                     }
@@ -127,9 +172,11 @@ Item {
                         Layout.preferredHeight: 45
                         Layout.preferredWidth: parent.width * 0.8
                         Layout.alignment: Qt.AlignCenter
+                        accessibleName: "Cancel all downloads"
+                        accessibleDescription: "Stop every active and queued download."
                         onClicked:
                         {
-                            app.downloaderController.downloaderVM.cancelAllDownloads();
+                            root.cancelAllDownloads();
                         }
                         label: "Cancel All"
                     }

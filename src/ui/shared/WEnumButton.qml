@@ -4,6 +4,9 @@ Rectangle {
     signal valueChanged();
     property int selectedIndex: 0
     property alias model: internalModel
+    property string accessibleName: "Option selector"
+    property string accessibleDescription: ""
+    property bool announceValueOnly: false
 
     function resetModel(newItems, newIndex) {
         internalModel.clear();
@@ -26,8 +29,29 @@ Rectangle {
             buttonlabel.text = internalModel.get(selectedIndex).text;
         }
     }
+    function cycleNext() {
+        if (!enabled || internalModel.count === 0) {
+            return;
+        }
+        fadeOut.start();
+    }
+    function cyclePrevious() {
+        if (!enabled || internalModel.count === 0) {
+            return;
+        }
+        selectedIndex = (selectedIndex - 1 + internalModel.count) % internalModel.count;
+        valueChanged();
+        fadeIn.start();
+    }
 
-    onSelectedIndexChanged: updateLabelText()
+    onSelectedIndexChanged: {
+        updateLabelText();
+        if (activeFocus) {
+            announceValueOnly = true;
+            Accessible.valueChanged();
+            resetAnnouncementNameTimer.restart();
+        }
+    }
 
     ListModel {
         id: internalModel
@@ -41,8 +65,28 @@ Rectangle {
     width: 40
     radius: 107
     height: 40
-    color: "#6c98c4"
+    color: mouseArea.containsMouse || activeFocus ? "#5a87b3" : "#6c98c4"
     scale: 1.0
+    border.width: activeFocus ? 2 : 0
+    border.color: activeFocus ? "#ffffff" : "transparent"
+    activeFocusOnTab: true
+
+    Accessible.role: Accessible.ComboBox
+    Accessible.name: announceValueOnly ? buttonlabel.text : (accessibleName + ": " + buttonlabel.text)
+    Accessible.description: accessibleDescription.length > 0
+                            ? accessibleDescription
+                            : "Use Enter, Space, or arrow keys to change option."
+    Accessible.focusable: enabled
+    Accessible.focused: activeFocus
+
+    Timer {
+        id: resetAnnouncementNameTimer
+        interval: 0
+        repeat: false
+        onTriggered: {
+            buttonRect.announceValueOnly = false;
+        }
+    }
 
     Behavior on color {
         ColorAnimation {
@@ -75,11 +119,41 @@ Rectangle {
         }
     }
 
+    Keys.onReturnPressed: {
+        cycleNext();
+        event.accepted = true;
+    }
+    Keys.onEnterPressed: {
+        cycleNext();
+        event.accepted = true;
+    }
+    Keys.onSpacePressed: {
+        cycleNext();
+        event.accepted = true;
+    }
+    Keys.onUpPressed: {
+        cycleNext();
+        event.accepted = true;
+    }
+    Keys.onRightPressed: {
+        cycleNext();
+        event.accepted = true;
+    }
+    Keys.onDownPressed: {
+        cyclePrevious();
+        event.accepted = true;
+    }
+    Keys.onLeftPressed: {
+        cyclePrevious();
+        event.accepted = true;
+    }
+
     MouseArea {
+        id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
-        onEntered: buttonRect.color = "#5a87b3"
-        onExited: buttonRect.color = "#6c98c4"
+        enabled: buttonRect.enabled
+        cursorShape: Qt.PointingHandCursor
         onPressed: {
             shrinkAnim.running = true
         }
@@ -87,7 +161,7 @@ Rectangle {
             growAnim.running = true
         }
         onClicked: {
-            fadeOut.start()
+            cycleNext();
         }
     }
 
@@ -103,9 +177,15 @@ Rectangle {
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         font.pointSize: 10
+        Accessible.ignored: true
     }
 
     Component.onCompleted: {
         updateLabelText();
+    }
+    onActiveFocusChanged: {
+        if (!activeFocus) {
+            announceValueOnly = false;
+        }
     }
 }

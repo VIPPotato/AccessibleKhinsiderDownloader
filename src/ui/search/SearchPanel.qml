@@ -8,6 +8,28 @@ Rectangle {
     id: mainWindow
     height : 500
     color: "#2c3e50"
+    Accessible.role: Accessible.Pane
+    Accessible.name: "Search panel"
+    Accessible.description: "Search for albums and add selected results to the download queue."
+    function triggerSearch() {
+        app.searchController.doSearch(textfield.text);
+    }
+    function addCheckedSearchResultsToDownloads() {
+        searchList.addCheckedToDownloads();
+    }
+    function appendCheckedSearchUrlsToDownloadInput() {
+        searchList.appendCheckedUrlsToDownloadInput();
+    }
+
+    Keys.onPressed: (event) => {
+        if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_D) {
+            addCheckedSearchResultsToDownloads();
+            event.accepted = true;
+        } else if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_U) {
+            appendCheckedSearchUrlsToDownloadInput();
+            event.accepted = true;
+        }
+    }
 
     Connections
     {
@@ -98,6 +120,20 @@ Rectangle {
                                     placeholderTextColor: "#b5ffffff"
                                     verticalAlignment: Text.AlignVCenter
                                     width: parent.width
+                                    activeFocusOnTab: true
+
+                                    Accessible.role: Accessible.EditableText
+                                    Accessible.name: "Search albums"
+                                    Accessible.description: "Type an album name and press Enter to search."
+                                    Accessible.focusable: true
+                                    Accessible.focused: activeFocus
+
+                                    function focusNextEditableTarget(forward) {
+                                        var nextItem = textfield.nextItemInFocusChain(forward);
+                                        if (nextItem && nextItem !== textfield) {
+                                            nextItem.forceActiveFocus();
+                                        }
+                                    }
 
                                     background: Rectangle {
                                         color: "#6C98C4" // match parent background
@@ -105,7 +141,16 @@ Rectangle {
                                     }
                                     onAccepted:
                                     {
-                                        app.searchController.doSearch(textfield.text);
+                                        mainWindow.triggerSearch();
+                                    }
+                                    Keys.onPressed: (event) => {
+                                        if (event.key === Qt.Key_Backtab || (event.key === Qt.Key_Tab && (event.modifiers & Qt.ShiftModifier))) {
+                                            textfield.focusNextEditableTarget(false);
+                                            event.accepted = true;
+                                        } else if (event.key === Qt.Key_Tab && event.modifiers === Qt.NoModifier) {
+                                            textfield.focusNextEditableTarget(true);
+                                            event.accepted = true;
+                                        }
                                     }
 
                                     onHoveredChanged: {
@@ -143,6 +188,41 @@ Rectangle {
                                 height: parent.height
                                 source: "qrc:/icons/search.svg"
                                 Layout.rightMargin: 5
+                                activeFocusOnTab: true
+
+                                Accessible.role: Accessible.Button
+                                Accessible.name: "Run search"
+                                Accessible.description: "Search using the current query."
+                                Accessible.focusable: true
+                                Accessible.focused: activeFocus
+
+                                function activateSearchButton() {
+                                    if (!enabled) {
+                                        return;
+                                    }
+                                    mainWindow.triggerSearch();
+                                }
+
+                                Keys.onReturnPressed: {
+                                    activateSearchButton();
+                                    event.accepted = true;
+                                }
+                                Keys.onEnterPressed: {
+                                    activateSearchButton();
+                                    event.accepted = true;
+                                }
+                                Keys.onSpacePressed: {
+                                    activateSearchButton();
+                                    event.accepted = true;
+                                }
+
+                                Rectangle {
+                                    anchors.fill: parent
+                                    color: "transparent"
+                                    border.width: icon.activeFocus ? 2 : 0
+                                    border.color: icon.activeFocus ? "#ffffff" : "transparent"
+                                    radius: 6
+                                }
 
                                 SequentialAnimation {
                                     id: shrinkAnim
@@ -181,10 +261,11 @@ Rectangle {
                                     anchors.rightMargin: 0
                                     anchors.topMargin: 0
                                     hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
 
                                     onClicked: {
 
-                                        app.searchController.doSearch(textfield.text);
+                                        icon.activateSearchButton();
                                     }
                                     onEntered: {
                                         growAnim.running = true;
@@ -206,6 +287,8 @@ Rectangle {
 
                         height: 40
                         label: "Add All"
+                        accessibleName: "Add all shown albums to downloads"
+                        accessibleDescription: "Add every current search result to the download queue."
                         width: parent.width * 0.2
                         onClicked:
                         {
@@ -219,6 +302,34 @@ Rectangle {
             Rectangle {
                 height: 1
                 width: parent.width
+            }
+            Row {
+                id: selectionActions
+                width: parent.width * 0.9
+                height: 36
+                spacing: 10
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                WButton {
+                    width: (parent.width - parent.spacing) * 0.5
+                    height: parent.height
+                    label: "Add Checked"
+                    accessibleName: "Add checked albums to downloads"
+                    accessibleDescription: "Queue checked search results for download. Shortcut: Ctrl+D."
+                    onClicked: {
+                        mainWindow.addCheckedSearchResultsToDownloads();
+                    }
+                }
+                WButton {
+                    width: (parent.width - parent.spacing) * 0.5
+                    height: parent.height
+                    label: "To URL Box"
+                    accessibleName: "Append checked album URLs to download input"
+                    accessibleDescription: "Append checked album links to the download tab URL input box. Shortcut: Ctrl+U."
+                    onClicked: {
+                        mainWindow.appendCheckedSearchUrlsToDownloadInput();
+                    }
+                }
             }
             //WButton {
             //    y: 0
@@ -236,7 +347,7 @@ Rectangle {
             //Search Info
             SearchResultsList {
                 id: searchList;
-                height: parent.height - rectangle.height - 30
+                height: parent.height - rectangle.height - selectionActions.height - 40
                 width: parent.width
             }
         }

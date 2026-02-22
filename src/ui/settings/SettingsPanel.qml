@@ -5,9 +5,23 @@ import QtQml
 import QtQuick.Layouts
 import QtQuick
 Rectangle {
+    id: root
     color: "#2c3e50"
     height: 700
     width: 400
+    Accessible.role: Accessible.Pane
+    Accessible.name: "Settings panel"
+    Accessible.description: "Configure download path, logging, performance, and content preferences."
+    function openLocalFolder(path) {
+        if (!path || path.length === 0) {
+            return;
+        }
+        if (Qt.platform.os === "windows") {
+            Qt.openUrlExternally("file:///" + path);
+        } else {
+            Qt.openUrlExternally("file://" + path);
+        }
+    }
 
     FolderDialog {
         id: folderDialog
@@ -36,8 +50,11 @@ Rectangle {
                 height: parent.height
                 radius: 10
                 width: parent.width * 0.7
+                border.width: downloadPathText.activeFocus ? 2 : 0
+                border.color: downloadPathText.activeFocus ? "#ffffff" : "transparent"
 
                 Text {
+                    id: downloadPathText
                     anchors.fill: parent
                     anchors.leftMargin: 8
                     color: "#ffffff"
@@ -45,19 +62,33 @@ Rectangle {
                     text: "Path: " + app.settings.downloadPath
                     elide: Text.ElideRight
                     verticalAlignment: Text.AlignVCenter
+                    activeFocusOnTab: true
+
+                    Accessible.role: Accessible.Link
+                    Accessible.name: "Open download path in file browser"
+                    Accessible.description: app.settings.downloadPath
+                    Accessible.focusable: true
+                    Accessible.focused: activeFocus
+
+                    Keys.onReturnPressed: {
+                        root.openLocalFolder(app.settings.downloadPath);
+                        event.accepted = true;
+                    }
+                    Keys.onEnterPressed: {
+                        root.openLocalFolder(app.settings.downloadPath);
+                        event.accepted = true;
+                    }
+                    Keys.onSpacePressed: {
+                        root.openLocalFolder(app.settings.downloadPath);
+                        event.accepted = true;
+                    }
                     MouseArea
                     {
                         anchors.fill: parent;
+                        cursorShape: Qt.PointingHandCursor
                         onClicked:
                         {
-                            if (Qt.platform.os === "windows")
-                            {
-                                Qt.openUrlExternally("file:///" +  app.settings.downloadPath);
-                            }
-                            else
-                            {
-                                Qt.openUrlExternally("file://" + app.settings.downloadPath);
-                            }
+                            root.openLocalFolder(app.settings.downloadPath);
                         }
                     }
                 }
@@ -67,6 +98,8 @@ Rectangle {
 
                 height: parent.height
                 label: "Select Path"
+                accessibleName: "Select download path"
+                accessibleDescription: "Open a folder picker to choose where downloads are saved."
                 width: parent.width * 0.25
 
                 onClicked: {
@@ -96,33 +129,55 @@ Rectangle {
                         font.pointSize: 12
                         text: "Enable Logging"
                         verticalAlignment: Text.AlignVCenter
+                        Accessible.role: Accessible.StaticText
+                        Accessible.name: "Enable logging"
                     }
                     Item {
                         Layout.fillWidth: true
                     }
                     Text {
+                        id: openLogPathText
                         color: "#99ffffff"
                         font.pointSize: 12
                         text: "Open Log Path"
                         verticalAlignment: Text.AlignVCenter
+                        activeFocusOnTab: true
+
+                        Accessible.role: Accessible.Link
+                        Accessible.name: "Open log folder in file browser"
+                        Accessible.description: app.logController.logDir
+                        Accessible.focusable: true
+                        Accessible.focused: activeFocus
+
+                        Keys.onReturnPressed: {
+                            root.openLocalFolder(app.logController.logDir);
+                            event.accepted = true;
+                        }
+                        Keys.onEnterPressed: {
+                            root.openLocalFolder(app.logController.logDir);
+                            event.accepted = true;
+                        }
+                        Keys.onSpacePressed: {
+                            root.openLocalFolder(app.logController.logDir);
+                            event.accepted = true;
+                        }
                         MouseArea
                         {
                             width: parent.width
                             height: logrow.height
                             y: logrow.y - parent.y
+                            cursorShape: Qt.PointingHandCursor
                             onClicked:
                             {
-                                if (Qt.platform.os === "windows")
-                                {
-                                    Qt.openUrlExternally("file:///" +  app.logController.logDir);
-                                }
-                                else
-                                {
-                                    Qt.openUrlExternally("file://" +  app.logController.logDir);
-                                }
-
-
+                                root.openLocalFolder(app.logController.logDir);
                             }
+                        }
+                        Rectangle {
+                            anchors.fill: parent
+                            color: "transparent"
+                            border.width: openLogPathText.activeFocus ? 2 : 0
+                            border.color: openLogPathText.activeFocus ? "#ffffff" : "transparent"
+                            radius: 4
                         }
                     }
                 }
@@ -133,6 +188,8 @@ Rectangle {
                 height: parent.height
                 width: parent.parent.width * 0.25
                 fontSize: 13
+                accessibleName: "Enable logging"
+                accessibleDescription: "Turn detailed log output on or off."
                 onValueChanged:
                 {
                     app.settings.setEnableLogging(selectedIndex != 0);
@@ -168,6 +225,8 @@ Rectangle {
                 height: parent.height
                 currentNumber: app.settings.downloadThreads
                 nextNumber: app.settings.downloadThreads
+                accessibleName: "Download threads"
+                accessibleDescription: "Number of download worker threads."
                 onValueChanged:
                 {
                     app.settings.setDownloadThreads(currentNumber);
@@ -218,6 +277,8 @@ Rectangle {
                 height: parent.height
                 currentNumber: app.settings.maxConcurrentDownloadsPerThread
                 nextNumber: app.settings.maxConcurrentDownloadsPerThread
+                accessibleName: "Concurrent downloads per thread"
+                accessibleDescription: "Maximum simultaneous album downloads per worker thread."
                 onValueChanged:
                 {
                     app.settings.setMaxConcurrentDownloadsPerThread(currentNumber);
@@ -252,6 +313,8 @@ Rectangle {
                 height: parent.height
                 width: parent.width * 0.25
                 fontSize: 13
+                accessibleName: "Audio quality"
+                accessibleDescription: "Preferred quality when a format choice is available."
                 onValueChanged:
                 {
                     app.settings.setPreferredAudioQualityInt(selectedIndex);
@@ -288,6 +351,8 @@ Rectangle {
                 height: parent.height
                 width: parent.width * 0.25
                 fontSize: 13
+                accessibleName: "Download art covers"
+                accessibleDescription: "Choose whether to download album cover artwork."
                 onValueChanged:
                 {
                     app.settings.setDownloadArt(selectedIndex != 0);
@@ -329,6 +394,8 @@ Rectangle {
                 height: parent.height
                 width: parent.width * 0.25
                 fontSize: 13
+                accessibleName: "Skip downloaded files"
+                accessibleDescription: "Skip songs that already exist in the destination folder."
                 onValueChanged:
                 {
                     app.settings.setSkipDownloaded(selectedIndex != 0);
@@ -369,6 +436,8 @@ Rectangle {
                 height: parent.height
                 width: parent.width * 0.25
                 fontSize: 13
+                accessibleName: "Check for updates"
+                accessibleDescription: "Check GitHub for a newer app release."
                 onClicked:
                 {
                     app.aboutController.checkForUpdates();
