@@ -26,6 +26,47 @@ void DownloaderController::addAlbumToDownload(QSharedPointer<Album> album, Downl
     m_addedAlbums[album] = quality;
 }
 
+void DownloaderController::removeAlbumIfCompleted(const QSharedPointer<Album> &album) {
+    if (!album) {
+        return;
+    }
+    if (album->totalSongs() <= 0) {
+        return;
+    }
+    if (album->downloadedSongs() < album->totalSongs()) {
+        return;
+    }
+    if (!m_addedAlbums.contains(album)) {
+        return;
+    }
+
+    int completedIndex = -1;
+    int indexCounter = 0;
+    for (auto it = m_addedAlbums.begin(); it != m_addedAlbums.end(); ++it, ++indexCounter) {
+        if (it.key() == album) {
+            completedIndex = indexCounter;
+            break;
+        }
+    }
+
+    const int previousSelection = m_Model->selectedQueueIndex();
+    album->setIsDownloading(false);
+    m_addedAlbums.remove(album);
+    updateModelData();
+
+    const int remainingCount = m_Model->rowCount();
+    if (remainingCount == 0) {
+        m_Model->setSelectedQueueIndex(-1);
+    } else if (completedIndex >= 0 && previousSelection > completedIndex) {
+        m_Model->setSelectedQueueIndex(previousSelection - 1);
+    } else if (completedIndex >= 0 && previousSelection == completedIndex) {
+        m_Model->setSelectedQueueIndex(qMin(completedIndex, remainingCount - 1));
+    }
+
+    emit albumDownloadFinished(album);
+    emit OnAlbumListUpdated();
+}
+
 void DownloaderController::fetchFullAlbumData(QSharedPointer<Album> album) {
     if (album->isInfoParsed()) {
         return;
@@ -343,6 +384,7 @@ void DownloaderController::downloadSongFile(QSharedPointer<Song> song, DownloadQ
     if (QFileInfo(filePath).exists() && QFileInfo(filePath).size() > 1024 && m_settings->skipDownloaded()) {
         song->setDownloaded(true);
         emit songDownloadFinished(song);
+        removeAlbumIfCompleted(album);
         return;
     }
 
@@ -368,6 +410,7 @@ void DownloaderController::downloadSongFile(QSharedPointer<Song> song, DownloadQ
                 qDebug() << "Successfully downloaded:" << song->name() << "to" << filePath;
                 song->setDownloaded(true);
                 emit songDownloadFinished(song);
+                removeAlbumIfCompleted(album);
                 songDownloadReply->deleteLater();
             }, Qt::QueuedConnection);
 

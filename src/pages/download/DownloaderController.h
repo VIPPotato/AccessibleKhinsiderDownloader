@@ -40,6 +40,8 @@ public slots:
     void requestAddAlbums(QVector<QSharedPointer<Album> > albums, DownloadQuality quality);
 
 private:
+    void removeAlbumIfCompleted(const QSharedPointer<Album> &album);
+
     void onAlbumDataFetched(QSharedPointer<Album> album, DownloadQuality quality);
 
     void processSongDownloads(QSharedPointer<Album> album, DownloadQuality quality);
