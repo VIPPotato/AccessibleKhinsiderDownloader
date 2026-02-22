@@ -7,6 +7,11 @@ Item {
     property var checkedResults: ({})
     property int checkedCount: 0
     property int checkedRevision: 0
+    property string typeAheadBuffer: ""
+    function clearTypeAheadBuffer() {
+        root.typeAheadBuffer = "";
+        typeAheadResetTimer.stop();
+    }
     function hideAllResults()
     {
         root.isSearching = true;
@@ -91,6 +96,49 @@ Item {
         var item = resultRepeater.itemAt(resultIndex);
         if (item) {
             item.forceActiveFocus();
+            root.ensureVisible(item);
+        }
+    }
+    function ensureVisible(item) {
+        if (!item || !scrollView.contentItem) {
+            return;
+        }
+        var flickable = scrollView.contentItem;
+        var top = item.y;
+        var bottom = item.y + item.height;
+        if (top < flickable.contentY) {
+            flickable.contentY = top;
+        } else if (bottom > flickable.contentY + scrollView.height) {
+            flickable.contentY = bottom - scrollView.height;
+        }
+    }
+    function pageStep() {
+        if (resultRepeater.count <= 0) {
+            return 1;
+        }
+        var firstItem = resultRepeater.itemAt(0);
+        var itemHeight = firstItem ? (firstItem.height + repeater.spacing) : 50;
+        return Math.max(1, Math.floor(scrollView.height / Math.max(1, itemHeight)) - 1);
+    }
+    function handleTypeAheadInput(character) {
+        if (!character || character.length === 0) {
+            return;
+        }
+        if (typeAheadResetTimer.running) {
+            typeAheadBuffer += character;
+        } else {
+            typeAheadBuffer = character;
+        }
+        typeAheadResetTimer.restart();
+
+        var startIndex = selectedIndex >= 0 ? selectedIndex + 1 : 0;
+        var match = app.searchController.searchResultVM.findIndexByNamePrefix(typeAheadBuffer, startIndex);
+        if (match < 0 && typeAheadBuffer.length > 1) {
+            typeAheadBuffer = character;
+            match = app.searchController.searchResultVM.findIndexByNamePrefix(typeAheadBuffer, startIndex);
+        }
+        if (match >= 0) {
+            focusResult(match);
         }
     }
 
@@ -102,7 +150,7 @@ Item {
 
     Accessible.role: Accessible.List
     Accessible.name: "Search results"
-    Accessible.description: "Album search results. Use Up and Down arrows to move, Space to check albums, Ctrl+D to queue checked albums, and Ctrl+U to append checked URLs to download input."
+    Accessible.description: "Use Up and Down arrows to move, Page Up and Page Down to jump, type letters to move by name, Space to check albums, Ctrl+D to queue checked albums, and Ctrl+U to append checked URLs to download input."
     activeFocusOnTab: true
     onActiveFocusChanged: {
         if (activeFocus && resultRepeater.count > 0) {
@@ -147,7 +195,7 @@ Item {
 
                     Accessible.role: Accessible.CheckBox
                     Accessible.name: model.name
-                    Accessible.description: "Result " + (index + 1) + " of " + resultRepeater.count + ". " + (isSelected ? "Selected" : "Not selected") + ". " + (isChecked ? "Checked" : "Not checked") + "."
+                    Accessible.description: "Result " + (index + 1) + " of " + resultRepeater.count + "."
                     Accessible.focusable: true
                     Accessible.focused: activeFocus
                     Accessible.selectable: true
@@ -160,23 +208,23 @@ Item {
                         }
                     }
 
-                    Keys.onReturnPressed: {
+                    Keys.onReturnPressed: (event) => {
                         root.toggleResultChecked(index);
                         event.accepted = true;
                     }
-                    Keys.onEnterPressed: {
+                    Keys.onEnterPressed: (event) => {
                         root.toggleResultChecked(index);
                         event.accepted = true;
                     }
-                    Keys.onSpacePressed: {
+                    Keys.onSpacePressed: (event) => {
                         root.toggleResultChecked(index);
                         event.accepted = true;
                     }
-                    Keys.onUpPressed: {
+                    Keys.onUpPressed: (event) => {
                         root.focusResult(index - 1);
                         event.accepted = true;
                     }
-                    Keys.onDownPressed: {
+                    Keys.onDownPressed: (event) => {
                         root.focusResult(index + 1);
                         event.accepted = true;
                     }
@@ -193,17 +241,29 @@ Item {
                         } else if (event.key === Qt.Key_End) {
                             root.focusResult(resultRepeater.count - 1);
                             event.accepted = true;
+                        } else if (event.key === Qt.Key_PageUp) {
+                            root.focusResult(index - root.pageStep());
+                            event.accepted = true;
+                        } else if (event.key === Qt.Key_PageDown) {
+                            root.focusResult(index + root.pageStep());
+                            event.accepted = true;
+                        } else if (event.modifiers === Qt.NoModifier
+                                   && event.text
+                                   && event.text.length === 1
+                                   && /[0-9A-Za-z]/.test(event.text)) {
+                            root.handleTypeAheadInput(event.text.toLowerCase());
+                            event.accepted = true;
                         }
                     }
 
                     Behavior on scale {
                         NumberAnimation {
-                            duration: 150
+                            duration: 80
                         }
                     }
                     Behavior on x {
                         NumberAnimation {
-                            duration: 150
+                            duration: 80
                             easing.type: Easing.InOutQuad
                         }
                     }
@@ -264,6 +324,7 @@ Item {
                         text: model.name
                         verticalAlignment: Text.AlignVCenter
                         width: parent.width
+                        Accessible.ignored: true
                     }
                 }
             }
@@ -273,6 +334,7 @@ Item {
            target: app.searchController.searchResultVM
            function onSearchStarted() {
                root.hideAllResults();
+               root.clearTypeAheadBuffer();
            }
        }
 
@@ -280,9 +342,19 @@ Item {
             target: app.searchController.searchResultVM
             function onSearchCompleted() {
                 root.isSearching = false;
+                root.clearTypeAheadBuffer();
                 if (resultRepeater.count > 0) {
                     root.focusResult(0);
                 }
             }
         }
+
+    Timer {
+        id: typeAheadResetTimer
+        interval: 750
+        repeat: false
+        onTriggered: {
+            root.typeAheadBuffer = "";
+        }
+    }
 }

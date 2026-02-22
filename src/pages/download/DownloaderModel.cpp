@@ -84,6 +84,18 @@ int DownloaderModel::totalSongs() const {
     return total;
 }
 
+bool DownloaderModel::hasSelectedQueueItem() const {
+    return m_selectedQueueIndex >= 0 && m_selectedQueueIndex < m_albums.size();
+}
+
+void DownloaderModel::cancelSelectedAlbum() {
+    cancelAlbum(m_selectedQueueIndex);
+}
+
+void DownloaderModel::retrySelectedAlbum() {
+    retryAlbum(m_selectedQueueIndex);
+}
+
 // Slots for canceling
 void DownloaderModel::cancelAllDownloads() {
     for (auto *Album: m_albums) {
@@ -92,21 +104,35 @@ void DownloaderModel::cancelAllDownloads() {
     beginResetModel();
     m_albums.clear();
     endResetModel();
+    setSelectedQueueIndex(-1);
     emit totalsChanged();
 }
 
 void DownloaderModel::cancelAlbum(int index) {
-    if (index >= 0 && index < m_albums.size())
-        emit albumCancelRequested(m_albums.at(index));
+    if (index < 0 || index >= m_albums.size()) {
+        return;
+    }
+
+    emit albumCancelRequested(m_albums.at(index));
     beginResetModel();
     m_albums.removeAt(index);
     endResetModel();
+
+    if (m_albums.isEmpty()) {
+        setSelectedQueueIndex(-1);
+    } else if (m_selectedQueueIndex > index) {
+        setSelectedQueueIndex(m_selectedQueueIndex - 1);
+    } else if (m_selectedQueueIndex == index) {
+        setSelectedQueueIndex(qMin(index, m_albums.size() - 1));
+    }
+
     emit totalsChanged();
 }
 
 void DownloaderModel::retryAlbum(int index) {
-    if (index >= 0 && index < m_albums.size())
+    if (index >= 0 && index < m_albums.size()) {
         emit albumRetryRequested(m_albums.at(index));
+    }
 }
 
 
@@ -121,6 +147,14 @@ void DownloaderModel::setAlbums(const QVector<Album *> &albums) {
         });
     }
     endResetModel();
+
+    if (m_albums.isEmpty()) {
+        setSelectedQueueIndex(-1);
+    } else if (m_selectedQueueIndex >= m_albums.size()) {
+        setSelectedQueueIndex(m_albums.size() - 1);
+    } else if (m_selectedQueueIndex < -1) {
+        setSelectedQueueIndex(-1);
+    }
 }
 
 void DownloaderModel::insertAlbum(Album *album) {
@@ -142,6 +176,18 @@ void DownloaderModel::setBulkUrlBuffer(const QString &buffer) {
     }
     m_bulkUrlBuffer = buffer;
     emit bulkUrlBufferChanged();
+}
+
+void DownloaderModel::setSelectedQueueIndex(int index) {
+    int normalized = index;
+    if (normalized < 0 || normalized >= m_albums.size()) {
+        normalized = -1;
+    }
+    if (m_selectedQueueIndex == normalized) {
+        return;
+    }
+    m_selectedQueueIndex = normalized;
+    emit selectedQueueIndexChanged();
 }
 
 void DownloaderModel::appendBulkUrlBuffer(const QString &urls) {

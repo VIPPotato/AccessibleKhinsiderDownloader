@@ -38,7 +38,7 @@ void SearchController::doSearch(const QString &query) {
     QNetworkRequest request(url);
     QNetworkReply *reply = networkManager->get(request);
 
-    connect(reply, &QNetworkReply::finished, [this,reply]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
         if (reply->error() != QNetworkReply::NoError) {
             qWarning() << "Request failed:" << reply->errorString();
             reply->deleteLater();
@@ -52,9 +52,10 @@ void SearchController::doSearch(const QString &query) {
         htmlDocPtr doc = htmlReadMemory(htmlStr.c_str(), htmlStr.size(), nullptr, nullptr,
                                         HTML_PARSE_NOERROR | HTML_PARSE_NOWARNING);
         QVector<QSharedPointer<Album> > res;
-        if (!doc)
-        {
+        if (!doc) {
             qWarning() << "HTML read failed";
+            emit searchResultsReceived(res);
+            return;
         }
 
         KhinsiderParser::ParseSearchResults(doc, res);
@@ -72,7 +73,7 @@ void SearchController::fetchFullAlbumData(QSharedPointer<Album> album) {
     QNetworkRequest request(url);
     QNetworkReply *reply = networkManager->get(request);
 
-    connect(reply, &QNetworkReply::finished, [this,reply,album]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply, album]() {
         if (reply->error() != QNetworkReply::NoError) {
             qWarning() << "Request failed:" << reply->errorString();
             reply->deleteLater();
@@ -86,17 +87,15 @@ void SearchController::fetchFullAlbumData(QSharedPointer<Album> album) {
         htmlDocPtr doc = htmlReadMemory(htmlStr.c_str(), htmlStr.size(), nullptr, nullptr,
                                         HTML_PARSE_NOERROR | HTML_PARSE_NOWARNING);
 
-        if (!doc)
-        {
+        if (!doc) {
             album->setHasErrors(true);
-            xmlFreeDoc(doc);
             qWarning() << "HTML read failed";
             return;
         }
-        if(!KhinsiderParser::ParseAlbumFullData(doc, album))
-        {
+        if (!KhinsiderParser::ParseAlbumFullData(doc, album)) {
             album->setHasErrors(true);
             xmlFreeDoc(doc);
+            return;
         }
         ImagePrecache::instance()->precache(album->albumImage());
         emit onFullFetched();
