@@ -15,14 +15,15 @@ Window {
     signal accepted
     title: "A new update has been released!"
     Component.onCompleted: okButton.forceActiveFocus()
-    Keys.onEscapePressed: {
-        window.visible = false;
-        event.accepted = true;
-    }
     Column
     {
+        focus: true
         width: parent.width
         height:parent.height
+        Keys.onEscapePressed: (event) => {
+            window.visible = false;
+            event.accepted = true;
+        }
         Text
         {
             width: parent.width

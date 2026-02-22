@@ -28,15 +28,15 @@ Item {
         root.clicked();
     }
 
-    Keys.onReturnPressed: {
+    Keys.onReturnPressed: (event) => {
         activateButton();
         event.accepted = true;
     }
-    Keys.onEnterPressed: {
+    Keys.onEnterPressed: (event) => {
         activateButton();
         event.accepted = true;
     }
-    Keys.onSpacePressed: {
+    Keys.onSpacePressed: (event) => {
         activateButton();
         event.accepted = true;
     }
