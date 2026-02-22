@@ -1,8 +1,9 @@
 import QtQuick 2.15
 
 Rectangle {
-    signal valueChanged();
+    signal selectionChanged();
     property int selectedIndex: 0
+    property string value: buttonlabel.text
     property alias model: internalModel
     property string accessibleName: "Option selector"
     property string accessibleDescription: ""
@@ -40,7 +41,7 @@ Rectangle {
             return;
         }
         selectedIndex = (selectedIndex - 1 + internalModel.count) % internalModel.count;
-        valueChanged();
+        selectionChanged();
         fadeIn.start();
     }
 
@@ -49,7 +50,6 @@ Rectangle {
         if (activeFocus) {
             announceValueOnly = true;
             Accessible.valueChanged();
-            resetAnnouncementNameTimer.restart();
         }
     }
 
@@ -79,15 +79,6 @@ Rectangle {
     Accessible.focusable: enabled
     Accessible.focused: activeFocus
 
-    Timer {
-        id: resetAnnouncementNameTimer
-        interval: 0
-        repeat: false
-        onTriggered: {
-            buttonRect.announceValueOnly = false;
-        }
-    }
-
     Behavior on color {
         ColorAnimation {
             duration: 150
@@ -114,7 +105,7 @@ Rectangle {
         NumberAnimation { target: buttonlabel; property: "opacity"; to: 0; duration: 100 }
         onStopped: {
             buttonRect.selectedIndex = (buttonRect.selectedIndex + 1) % internalModel.count;
-            valueChanged();
+            selectionChanged();
             fadeIn.start();
         }
     }

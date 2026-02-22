@@ -28,23 +28,6 @@ Window {
         slider.jump(button);
         button.forceActiveFocus();
     }
-    Keys.onPressed: {
-        if (event.modifiers & Qt.ControlModifier) {
-            if (event.key === Qt.Key_1) {
-                setActiveTab("downloadtab", leftdownloadbutton);
-                event.accepted = true;
-            } else if (event.key === Qt.Key_2) {
-                setActiveTab("searchtab", leftsearchbutton);
-                event.accepted = true;
-            } else if (event.key === Qt.Key_3) {
-                setActiveTab("settingstab", leftsettingsbutton);
-                event.accepted = true;
-            } else if (event.key === Qt.Key_4) {
-                setActiveTab("abouttab", leftaboutbutton);
-                event.accepted = true;
-            }
-        }
-    }
     Component.onCompleted: {
         slider.jump(leftdownloadbutton);
         leftdownloadbutton.forceActiveFocus();
@@ -53,9 +36,27 @@ Window {
     Column {
         id: maincol
         state: "downloadtab"
+        focus: true
         Accessible.role: Accessible.Pane
         Accessible.name: "Khinsider Downloader"
         Accessible.description: "Main application view. Use Ctrl+1 for Download, Ctrl+2 for Search, Ctrl+3 for Settings, and Ctrl+4 for About."
+        Keys.onPressed: (event) => {
+            if (event.modifiers & Qt.ControlModifier) {
+                if (event.key === Qt.Key_1) {
+                    window.setActiveTab("downloadtab", leftdownloadbutton);
+                    event.accepted = true;
+                } else if (event.key === Qt.Key_2) {
+                    window.setActiveTab("searchtab", leftsearchbutton);
+                    event.accepted = true;
+                } else if (event.key === Qt.Key_3) {
+                    window.setActiveTab("settingstab", leftsettingsbutton);
+                    event.accepted = true;
+                } else if (event.key === Qt.Key_4) {
+                    window.setActiveTab("abouttab", leftaboutbutton);
+                    event.accepted = true;
+                }
+            }
+        }
         states: [
             State {
                 name: "downloadtab" //centerPanel

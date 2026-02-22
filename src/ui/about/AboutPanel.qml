@@ -85,11 +85,11 @@ Rectangle {
                     }
                 }
 
-                Keys.onUpPressed: {
+                Keys.onUpPressed: (event) => {
                     focusContributor((selectedContributorIndex >= 0 ? selectedContributorIndex : contributorsModel.count) - 1);
                     event.accepted = true;
                 }
-                Keys.onDownPressed: {
+                Keys.onDownPressed: (event) => {
                     focusContributor((selectedContributorIndex >= 0 ? selectedContributorIndex : -1) + 1);
                     event.accepted = true;
                 }
@@ -151,11 +151,9 @@ Rectangle {
 
                                 Accessible.role: Accessible.ListItem
                                 Accessible.name: username + ", " + contributionType
-                                Accessible.description: "Contributor " + (index + 1) + " of " + contributorsModel.count + ". " + (isSelected ? "Selected" : "Not selected")
+                                Accessible.description: "Contributor " + (index + 1) + " of " + contributorsModel.count + "."
                                 Accessible.focusable: true
                                 Accessible.focused: activeFocus
-                                Accessible.selectable: true
-                                Accessible.selected: isSelected
 
                                 onActiveFocusChanged: {
                                     if (activeFocus) {
@@ -163,11 +161,11 @@ Rectangle {
                                     }
                                 }
 
-                                Keys.onUpPressed: {
+                                Keys.onUpPressed: (event) => {
                                     contributorsListScope.focusContributor(index - 1);
                                     event.accepted = true;
                                 }
-                                Keys.onDownPressed: {
+                                Keys.onDownPressed: (event) => {
                                     contributorsListScope.focusContributor(index + 1);
                                     event.accepted = true;
                                 }
@@ -260,15 +258,15 @@ Rectangle {
                 Accessible.focusable: true
                 Accessible.focused: activeFocus
 
-                Keys.onReturnPressed: {
+                Keys.onReturnPressed: (event) => {
                     Qt.openUrlExternally("https://weesp.in");
                     event.accepted = true;
                 }
-                Keys.onEnterPressed: {
+                Keys.onEnterPressed: (event) => {
                     Qt.openUrlExternally("https://weesp.in");
                     event.accepted = true;
                 }
-                Keys.onSpacePressed: {
+                Keys.onSpacePressed: (event) => {
                     Qt.openUrlExternally("https://weesp.in");
                     event.accepted = true;
                 }
