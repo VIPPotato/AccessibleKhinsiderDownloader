@@ -7,6 +7,7 @@ Item {
 
     signal cancelRequested()
     signal retryRequested()
+    property bool selected: false
     property var donwloadedSongs
     property var totalSongs
     property var speedInBytes
@@ -17,13 +18,15 @@ Item {
 
     height: 50
     width: 400
-    activeFocusOnTab: true
+    activeFocusOnTab: false
 
     Accessible.role: Accessible.ListItem
     Accessible.name: albumName.text
-    Accessible.description: "State: " + root.state + ". Progress " + percentageBar.percentage + " percent. " + filesLabel.text + ". " + downloadStatus.text + ". Press Delete to cancel or R to retry when available."
+    Accessible.description: root.state + ". " + percentageBar.percentage + " percent. " + (donwloadedSongs || 0) + "/" + (totalSongs || 0) + ". " + formatSpeed(speedInBytes || 0) + "."
     Accessible.focusable: true
     Accessible.focused: activeFocus
+    Accessible.selectable: true
+    Accessible.selected: selected
 
     function formatSpeed(bytesPerSecond) {
         if (bytesPerSecond >= 1024 * 1024) {
@@ -58,7 +61,7 @@ Item {
         if (event.key === Qt.Key_Delete || event.key === Qt.Key_Backspace) {
             requestCancel();
             event.accepted = true;
-        } else if (event.key === Qt.Key_R) {
+        } else if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_R) {
             requestRetry();
             event.accepted = true;
         }
@@ -113,8 +116,8 @@ Item {
         width: parent.width
         height: parent.height
         radius: 20
-        border.width: root.activeFocus ? 2 : 0
-        border.color: root.activeFocus ? "#ffffff" : "transparent"
+        border.width: (root.activeFocus || root.selected) ? 2 : 0
+        border.color: (root.activeFocus || root.selected) ? "#ffffff" : "transparent"
 
         MouseArea {
             id: hoverArea
@@ -165,6 +168,7 @@ Item {
                 leftPadding: 7
                 font.bold: false
                 font.pointSize: 14
+                Accessible.ignored: true
             }
 
             Text {
@@ -179,6 +183,7 @@ Item {
                 rightPadding: 10
                 font.bold: false
                 font.pointSize: 14
+                Accessible.ignored: true
             }
         }
 
@@ -211,6 +216,7 @@ Item {
                         horizontalAlignment: Text.AlignLeft
                         verticalAlignment: Text.AlignVCenter
                         font.pointSize: 14
+                        Accessible.ignored: true
                     }
 
                     Text {
@@ -225,6 +231,7 @@ Item {
                         horizontalAlignment: Text.AlignLeft
                         verticalAlignment: Text.AlignVCenter
                         font.pointSize: 14
+                        Accessible.ignored: true
                     }
 
                     Image {
@@ -236,7 +243,7 @@ Item {
                         property string iconFallback: "qrc:/icons/retry.svg"
                         source: "../../../icons/retry.svg"
                         fillMode: Image.PreserveAspectFit
-                        activeFocusOnTab: visible
+                        activeFocusOnTab: false
 
                         Accessible.role: Accessible.Button
                         Accessible.name: "Retry album download"
@@ -293,7 +300,7 @@ Item {
                         Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
 
                         fillMode: Image.PreserveAspectFit
-                        activeFocusOnTab: visible
+                        activeFocusOnTab: false
 
                         Accessible.role: Accessible.Button
                         Accessible.name: "Cancel album download"

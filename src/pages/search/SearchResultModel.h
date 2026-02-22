@@ -1,6 +1,7 @@
 #ifndef SEARCHRESULTMODEL_H
 #define SEARCHRESULTMODEL_H
 #include <QAbstractListModel>
+#include <QTimer>
 
 #include "parser/Album.h"
 
@@ -16,6 +17,14 @@ public:
 
     explicit SearchResultModel(QObject *parent = nullptr)
         : QAbstractListModel(parent) {
+        m_selectionDebounceTimer.setSingleShot(true);
+        m_selectionDebounceTimer.setInterval(150);
+        connect(&m_selectionDebounceTimer, &QTimer::timeout, this, [this]() {
+            QSharedPointer<Album> album = getAlbumAt(m_selectedIndex);
+            if (album) {
+                emit albumSelected(album);
+            }
+        });
     }
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override {
@@ -59,21 +68,53 @@ public:
 
     int selectedIndex() const { return m_selectedIndex; }
     QVector<QSharedPointer<Album> > &albums() { return m_albums; }
+    Q_INVOKABLE int findIndexByNamePrefix(const QString &prefix, int startIndex = 0) const {
+        const QString needle = prefix.trimmed();
+        if (needle.isEmpty() || m_albums.isEmpty()) {
+            return -1;
+        }
+
+        const int count = m_albums.count();
+        int start = startIndex;
+        if (start < 0 || start >= count) {
+            start = 0;
+        }
+
+        for (int offset = 0; offset < count; ++offset) {
+            const int idx = (start + offset) % count;
+            if (m_albums.at(idx)->name().startsWith(needle, Qt::CaseInsensitive)) {
+                return idx;
+            }
+        }
+
+        return -1;
+    }
 
 public slots:
     void onSearchResultsReceived(const QVector<QSharedPointer<Album> > &result) {
+        m_selectionDebounceTimer.stop();
         m_selectedIndex = -1;
         setAlbums(result);
         emit searchCompleted();
     }
 
     void setSelectedIndex(int index) {
-        QSharedPointer<Album> album = getAlbumAt(index);
-        if (album) {
-            emit albumSelected(album);
+        int normalizedIndex = -1;
+        if (index >= 0 && index < m_albums.count()) {
+            normalizedIndex = index;
         }
-        m_selectedIndex = index;
+
+        if (normalizedIndex == m_selectedIndex) {
+            return;
+        }
+
+        m_selectedIndex = normalizedIndex;
         emit selectedIndexChanged();
+
+        m_selectionDebounceTimer.stop();
+        if (m_selectedIndex >= 0) {
+            m_selectionDebounceTimer.start();
+        }
     }
 
 signals:
@@ -91,6 +132,7 @@ signals:
 
 private:
     QVector<QSharedPointer<Album> > m_albums;
-    int m_selectedIndex;
+    int m_selectedIndex = -1;
+    QTimer m_selectionDebounceTimer;
 };
 #endif //SEARCHRESULTMODEL_H

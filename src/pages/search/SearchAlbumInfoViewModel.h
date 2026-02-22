@@ -1,6 +1,7 @@
 #ifndef SEARCHALBUMINFOVIEWMODEL_H
 #define SEARCHALBUMINFOVIEWMODEL_H
 #include <QObject>
+#include <QSet>
 #include "Album.h"
 
 class SearchAlbumInfoViewModel : public QObject {
@@ -21,7 +22,42 @@ public:
         QVariantList list;
         if (!m_currentAlbum)
             return list;
+        bool hasMp3 = false;
+        bool hasFlac = false;
+        QSet<QString> seenOtherFormats;
+        QVariantList otherFormats;
+
         for (const QString &format: m_currentAlbum->formats()) {
+            const QString normalized = format.simplified();
+            if (normalized.isEmpty()) {
+                continue;
+            }
+
+            const QString key = normalized.toUpper();
+            if (key.contains("MP3")) {
+                hasMp3 = true;
+                continue;
+            }
+            if (key.contains("FLAC") || key.contains("LOSSLESS")) {
+                hasFlac = true;
+                continue;
+            }
+
+            if (seenOtherFormats.contains(key)) {
+                continue;
+            }
+
+            seenOtherFormats.insert(key);
+            otherFormats.append(normalized);
+        }
+
+        if (hasMp3) {
+            list.append("MP3");
+        }
+        if (hasFlac) {
+            list.append("FLAC");
+        }
+        for (const QVariant &format : otherFormats) {
             list.append(format);
         }
 
@@ -82,7 +118,8 @@ public slots:
 
     void requestDownload(const QString &index) {
         DownloadQuality quality = DownloadQuality::UNKNOWN;
-        if (index == "MP3") {
+        const QString normalized = index.toUpper();
+        if (normalized.contains("MP3")) {
             quality = DownloadQuality::MP3;
         } else {
             quality = DownloadQuality::BEST;
